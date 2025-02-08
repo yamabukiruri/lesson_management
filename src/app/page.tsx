@@ -105,7 +105,7 @@ export default function Home() {
                 {students.map((student, index) => (
                   <TableRow key={index}>
                     <TableCell sx={{textAlign: 'center'}}>{student.docData.date.split(' ')[1]}</TableCell>
-                    <TableCell sx={{textAlign: 'center'}}><Link href={"/" + student.docId}>{student.docData.name}</Link></TableCell>
+                    <TableCell sx={{textAlign: 'center'}}><Link href={"/" + student.docId}>{student.docData.lastName + ' ' + student.docData.firstName}</Link></TableCell>
                     <TableCell sx={{textAlign: 'center'}}>{student.docData.isRegisteredAttendance ? '出席' : '未登録'}</TableCell>
                     <TableCell sx={{textAlign: 'center'}}>{student.docData.attendedDate.length + ' / ' + student.docData.maxCount}</TableCell>
                   </TableRow>
@@ -131,7 +131,7 @@ export default function Home() {
               {forgottenStudents.map((forgottenStudent, index) => (
                 <TableRow key={index}>
                   <TableCell sx={{textAlign: 'center'}}>{forgottenStudent.docData.date}</TableCell>
-                  <TableCell sx={{textAlign: 'center'}}><Link href={"/" + forgottenStudent.docId}>{forgottenStudent.docData.name}</Link></TableCell>
+                  <TableCell sx={{textAlign: 'center'}}><Link href={"/" + forgottenStudent.docId}>{forgottenStudent.docData.firstName}</Link></TableCell>
                   <TableCell sx={{textAlign: 'center'}}><MainBtn label="出席" onClick={() => {updateAttendance(forgottenStudent.docId, forgottenStudent.docData.attendedDate, forgottenStudent.docData.schedule)}} /></TableCell>
                 </TableRow>
               ))}
