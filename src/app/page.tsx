@@ -4,8 +4,9 @@ import Panel from "@/components/panel";
 import { Box, Link, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import db from '../firebase'
 import { useEffect, useState } from "react";
-import { Timestamp, collection, getDocs, onSnapshot, query, where } from "firebase/firestore"; 
+import { Timestamp, collection, getDocs, onSnapshot, query, where, doc, updateDoc } from "firebase/firestore"; 
 import { CardTitle } from "@/components/title";
+import { MainBtn } from "@/components/button";
 
 export default function Home() {
   const [students, setStudents] = useState<{ [x: string]: any; }[]>([]);
@@ -76,6 +77,15 @@ export default function Home() {
   }, []);
   // console.log(students.map(student => student.docData));
 
+  //出席登録
+  const updateAttendance = async (id: string, attendedDate: string[], schedule: string[]) => {
+    const docRef = doc(db, "students", id);
+    await updateDoc(docRef, {
+      attendedDate: [...attendedDate, schedule[0]],
+      schedule: schedule.slice(1)
+    });
+  };
+
   return (
     <Box sx={{ width: '100%' }}>
       {forgottenStudents.length === 0 ? (
@@ -112,7 +122,7 @@ export default function Home() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{textAlign: 'center'}}>日時</TableCell>
+                <TableCell sx={{textAlign: 'center'}}>対象日時</TableCell>
                 <TableCell sx={{textAlign: 'center'}}>名前</TableCell>
                 <TableCell sx={{textAlign: 'center'}}>出席登録</TableCell>
               </TableRow>
@@ -122,7 +132,7 @@ export default function Home() {
                 <TableRow key={index}>
                   <TableCell sx={{textAlign: 'center'}}>{forgottenStudent.docData.date}</TableCell>
                   <TableCell sx={{textAlign: 'center'}}><Link href={"/" + forgottenStudent.docId}>{forgottenStudent.docData.name}</Link></TableCell>
-                  <TableCell sx={{textAlign: 'center'}}></TableCell>
+                  <TableCell sx={{textAlign: 'center'}}><MainBtn label="出席" onClick={() => {updateAttendance(forgottenStudent.docId, forgottenStudent.docData.attendedDate, forgottenStudent.docData.schedule)}} /></TableCell>
                 </TableRow>
               ))}
             </TableBody>
