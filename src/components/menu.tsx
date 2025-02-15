@@ -137,7 +137,7 @@ export default function MenuBar() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Lseeon Manager
+            Lesson Manager
           </Typography>
         </Toolbar>
       </AppBar>
