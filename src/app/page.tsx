@@ -26,12 +26,18 @@ export default function Home() {
           const data = doc.data();
           const schedule = data?.schedule || [];
           const attendedDate = data?.attendedDate || [];
+          const absentDate = data?.absentDate || [];
   
-          // 出席登録済みか判定
-          const isRegisteredAttendance =
+          // 本日出欠登録済みか判定
+          const isAttendedToday =
             attendedDate.length > 0 &&
-            new Date(attendedDate[attendedDate.length - 1]) >= startOfToday &&
-            new Date(attendedDate[attendedDate.length - 1]) <= endOfToday;
+              new Date(attendedDate[attendedDate.length - 1]) >= startOfToday &&
+              new Date(attendedDate[attendedDate.length - 1]) <= endOfToday;
+          
+          const isAbsentToday =
+            absentDate.length > 0 &&
+            new Date(absentDate[absentDate.length - 1]) >= startOfToday &&
+            new Date(absentDate[absentDate.length - 1]) <= endOfToday;
   
           // 本日出席予定で、まだ出席登録をしていない生徒か判定
           const isToday =
@@ -52,7 +58,8 @@ export default function Home() {
               date: schedule[0]
                 ? schedule[0]
                 : "未設定",
-              isRegisteredAttendance: isRegisteredAttendance,
+                isAttendedToday: isAttendedToday,
+                isAbsentToday: isAbsentToday,
               isForgotten: isForgotten,
             },
           };
@@ -61,7 +68,7 @@ export default function Home() {
         // 状態を更新
         setStudents(
           formattedStudents.filter(
-            data => data.docData.isToday === true || data.docData.isRegisteredAttendance === true
+            data => data.docData.isToday === true || data.docData.isAttendedToday === true || data.docData.isAbsentToday === true
           )
         );
         setForgottenStudents(
@@ -90,7 +97,7 @@ export default function Home() {
     <Box sx={{ width: '100%' }}>
       {forgottenStudents.length === 0 ? (
         <Panel>
-          <CardTitle label='本日出席予定の生徒' />
+          <CardTitle label='本日の生徒' />
           <TableContainer sx={{width: '100%'}}>
             <Table>
               <TableHead>
@@ -98,7 +105,7 @@ export default function Home() {
                   <TableCell sx={{textAlign: 'center'}}>時間</TableCell>
                   <TableCell sx={{textAlign: 'center'}}>名前</TableCell>
                   <TableCell sx={{textAlign: 'center'}}>出席登録</TableCell>
-                  <TableCell sx={{textAlign: 'center'}}>出席回数</TableCell>
+                  <TableCell sx={{textAlign: 'center'}}>登録レッスン回数</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -106,8 +113,8 @@ export default function Home() {
                   <TableRow key={index}>
                     <TableCell sx={{textAlign: 'center'}}>{student.docData.date.split(' ')[1]}</TableCell>
                     <TableCell sx={{textAlign: 'center'}}><Link href={"/student/" + student.docId}>{student.docData.lastName + ' ' + student.docData.firstName}</Link></TableCell>
-                    <TableCell sx={{textAlign: 'center'}}>{student.docData.isRegisteredAttendance ? '出席' : '未登録'}</TableCell>
-                    <TableCell sx={{textAlign: 'center'}}>{student.docData.attendedDate.length + ' / ' + student.docData.maxCount}</TableCell>
+                    <TableCell sx={{textAlign: 'center'}}>{student.docData.isAttendedToday ? '出席' : student.docData.isAbsentToday ? '欠席' : '未登録'}</TableCell>
+                    <TableCell sx={{textAlign: 'center'}}>{student.docData.attendedDate.length + student.docData.absentDate.length + ' / ' + student.docData.maxCount}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
