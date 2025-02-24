@@ -1,0 +1,67 @@
+"use client";
+
+import Panel from "@/components/panel";
+import { Box, Link, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import db from '../../firebase'
+import { useEffect, useState } from "react";
+import { collection, onSnapshot } from "firebase/firestore"; 
+import { CardTitle } from "@/components/title";
+import { MainBtn } from "@/components/button";
+import { useRouter } from "next/navigation";
+
+export default function Student() {
+  const router = useRouter();
+  const [students, setStudents] = useState<{ [x: string]: any; }[]>([]);
+
+  useEffect(() => {
+    //リアルタイムでデータ更新
+    const unsubscribe = onSnapshot(collection(db, "students"), (querySnapshot) => {
+      try {
+        // データ整形
+        const fetchedStudents = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {docId: doc.id, ...data};
+        });
+  
+        // 状態を更新
+        setStudents(fetchedStudents);
+      } catch (error) {
+        console.error("Error processing snapshot data:", error);
+      }
+    });
+  
+    // クリーンアップ関数
+    return () => unsubscribe();
+  }, []);
+
+  return (
+    <Box sx={{ width: '100%' }}>
+      <Panel>
+        <CardTitle label='生徒一覧' />
+        <TableContainer sx={{width: '100%'}}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{textAlign: 'center'}}>名前</TableCell>
+                <TableCell sx={{textAlign: 'center'}}>年齢</TableCell>
+                <TableCell sx={{textAlign: 'center'}}>登録レッスン回数</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {students.map((student, index) => (
+                <TableRow key={index}>
+                  <TableCell sx={{textAlign: 'center'}}><Link href={"/student/" + student.docId}>{student.lastName + ' ' + student.firstName}</Link></TableCell>
+                  <TableCell sx={{textAlign: 'center'}}>{student.age}</TableCell>
+                  <TableCell sx={{textAlign: 'center'}}>{student.attendedDate.length + student.absentDate.length + ' / ' + student.maxCount}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Panel>
+      <Box sx={{display: 'flex', alignItems: '', justifyContent: 'right'}}>
+          <MainBtn label="新規生徒登録" onClick={() => {router.push('student/0')}} />
+      </Box>
+    </Box>
+  );
+}

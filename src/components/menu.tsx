@@ -20,6 +20,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
+import { useRouter } from 'next/navigation';
 
 const drawerWidth = 240;
 
@@ -105,8 +106,20 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
+const menuList = [
+  {
+    text: 'ホーム',
+    link: '/',
+  },
+  {
+    text: '生徒情報',
+    link: '/student',
+  },
+]
+
 export default function MenuBar() {
   const theme = useTheme();
+  const router = useRouter();
   const [open, setOpen] = React.useState(false);
 
   const handleDrawerOpen = () => {
@@ -149,8 +162,8 @@ export default function MenuBar() {
         </DrawerHeader>
         <Divider />
         <List>
-          {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
+          {menuList.map((menu, index) => (
+            <ListItem key={menu.text} disablePadding sx={{ display: 'block' }}>
               <ListItemButton
                 sx={[
                   {
@@ -165,6 +178,7 @@ export default function MenuBar() {
                         justifyContent: 'center',
                       },
                 ]}
+                onClick={() => {router.push(menu.link)}}
               >
                 <ListItemIcon
                   sx={[
@@ -184,7 +198,7 @@ export default function MenuBar() {
                   {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
                 </ListItemIcon>
                 <ListItemText
-                  primary={text}
+                  primary={menu.text}
                   sx={[
                     open
                       ? {

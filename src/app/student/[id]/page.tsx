@@ -12,7 +12,7 @@ import { DateCalendar, LocalizationProvider, PickersDay } from '@mui/x-date-pick
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { MainBtn } from '@/components/button';
 
-export default function Home() {
+export default function StudentId() {
   const params = useParams();
   const id = params['id'] as string;
   const router = useRouter();
@@ -168,7 +168,7 @@ export default function Home() {
         schedule: student.schedule.map((date: Dayjs) => date.startOf('day').set('hour', student.hour).set('minute', student.minute).set('second', 0).format("YYYY-MM-DD HH:mm:ss")).sort((a: string, b: string) => dayjs(a, "YYYY-MM-DD HH:mm:ss").valueOf() - dayjs(b, "YYYY-MM-DD HH:mm:ss").valueOf()), //形を整えた後、古い順にソート
       })
     }
-    router.push('/');
+    router.push('/student');
   }
 
   return (
