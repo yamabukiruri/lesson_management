@@ -220,7 +220,7 @@ export default function StudentId() {
           </Box>
         </Box>
         <Divider />
-        <Typography sx={{ marginTop: 2, marginBottom: 1 }}>スケジュール</Typography>
+        <Typography sx={{ marginTop: 2, marginBottom: 1 }}>今回分スケジュール</Typography>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateCalendar
             value={selectedDate}
