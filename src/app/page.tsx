@@ -93,6 +93,15 @@ export default function Home() {
     });
   };
 
+  //欠席登録
+  const updateAbsence = async (id: string, absentDate: string[], schedule: string[]) => {
+    const docRef = doc(db, "students", id);
+    await updateDoc(docRef, {
+      absentDate: [...absentDate, schedule[0]],
+      schedule: schedule.slice(1)
+    });
+  };
+
   return (
     <Box sx={{ width: '100%' }}>
       {forgottenStudents.length === 0 ? (
@@ -113,7 +122,15 @@ export default function Home() {
                   <TableRow key={index}>
                     <TableCell sx={{textAlign: 'center'}}>{student.docData.date.split(' ')[1]}</TableCell>
                     <TableCell sx={{textAlign: 'center'}}><Link href={"/student/" + student.docId}>{student.docData.lastName + ' ' + student.docData.firstName}</Link></TableCell>
-                    <TableCell sx={{textAlign: 'center'}}>{student.docData.isAttendedToday ? '出席' : student.docData.isAbsentToday ? '欠席' : '未登録'}</TableCell>
+                    <TableCell sx={{textAlign: 'center'}}>
+                      {student.docData.isAttendedToday ? '出席' 
+                        : student.docData.isAbsentToday ? '欠席' 
+                        : <>
+                          <MainBtn label="出席" onClick={() => {updateAttendance(student.docId, student.docData.attendedDate, student.docData.schedule)}} />
+                          <MainBtn label="欠席" sx={{ml: 2}} onClick={() => {updateAbsence(student.docId, student.docData.absentDate, student.docData.schedule)}} />
+                          </>
+                      }
+                    </TableCell>
                     <TableCell sx={{textAlign: 'center'}}>{student.docData.attendedDate.length + student.docData.absentDate.length + ' / ' + student.docData.maxCount}</TableCell>
                   </TableRow>
                 ))}
@@ -138,8 +155,11 @@ export default function Home() {
               {forgottenStudents.map((forgottenStudent, index) => (
                 <TableRow key={index}>
                   <TableCell sx={{textAlign: 'center'}}>{forgottenStudent.docData.date}</TableCell>
-                  <TableCell sx={{textAlign: 'center'}}><Link href={"/student/" + forgottenStudent.docId}>{forgottenStudent.docData.firstName}</Link></TableCell>
-                  <TableCell sx={{textAlign: 'center'}}><MainBtn label="出席" onClick={() => {updateAttendance(forgottenStudent.docId, forgottenStudent.docData.attendedDate, forgottenStudent.docData.schedule)}} /></TableCell>
+                  <TableCell sx={{textAlign: 'center'}}><Link href={"/student/" + forgottenStudent.docId}>{forgottenStudent.docData.lastName + ' ' + forgottenStudent.docData.firstName}</Link></TableCell>
+                  <TableCell sx={{textAlign: 'center'}}>
+                    <MainBtn label="出席" onClick={() => {updateAttendance(forgottenStudent.docId, forgottenStudent.docData.attendedDate, forgottenStudent.docData.schedule)}} />
+                    <MainBtn label="欠席" sx={{ml: 2}} onClick={() => {updateAbsence(forgottenStudent.docId, forgottenStudent.docData.absentDate, forgottenStudent.docData.schedule)}} />
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

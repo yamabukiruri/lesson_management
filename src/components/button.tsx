@@ -1,12 +1,13 @@
-import { Button } from "@mui/material";
+import { Button, SxProps } from "@mui/material";
 
 interface MainBtnProps {
   label: string;
+  sx?: SxProps;
   onClick: () => void;
 };
 
-export function MainBtn ({label, onClick}: MainBtnProps) {
+export function MainBtn ({label, sx, onClick}: MainBtnProps) {
   return (
-    <Button variant="contained" onClick={onClick}>{label}</Button>
+    <Button variant="contained" onClick={onClick} sx={sx}>{label}</Button>
   );
 };
