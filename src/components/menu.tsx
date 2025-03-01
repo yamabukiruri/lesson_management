@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles';
+import { styled, useTheme, CSSObject } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import MuiDrawer from '@mui/material/Drawer';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
@@ -18,13 +18,14 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+import PianoRoundedIcon from '@mui/icons-material/PianoRounded';
+import SentimentSatisfiedAltRoundedIcon from '@mui/icons-material/SentimentSatisfiedAltRounded';
 import { useRouter } from 'next/navigation';
+import { theme } from '@/library/theme';
 
 const drawerWidth = 240;
 
-const openedMixin = (theme: Theme): CSSObject => ({
+const openedMixin = (): CSSObject => ({
   width: drawerWidth,
   transition: theme.transitions.create('width', {
     easing: theme.transitions.easing.sharp,
@@ -33,7 +34,7 @@ const openedMixin = (theme: Theme): CSSObject => ({
   overflowX: 'hidden',
 });
 
-const closedMixin = (theme: Theme): CSSObject => ({
+const closedMixin = (): CSSObject => ({
   transition: theme.transitions.create('width', {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
@@ -91,15 +92,15 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
       {
         props: ({ open }) => open,
         style: {
-          ...openedMixin(theme),
-          '& .MuiDrawer-paper': openedMixin(theme),
+          ...openedMixin(),
+          '& .MuiDrawer-paper': openedMixin(),
         },
       },
       {
         props: ({ open }) => !open,
         style: {
-          ...closedMixin(theme),
-          '& .MuiDrawer-paper': closedMixin(theme),
+          ...closedMixin(),
+          '& .MuiDrawer-paper': closedMixin(),
         },
       },
     ],
@@ -109,16 +110,17 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 const menuList = [
   {
     text: 'ホーム',
+    icon: <PianoRoundedIcon />,
     link: '/',
   },
   {
     text: '生徒情報',
+    icon: <SentimentSatisfiedAltRoundedIcon />,
     link: '/student',
   },
 ]
 
 export default function MenuBar() {
-  const theme = useTheme();
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
 
@@ -133,7 +135,7 @@ export default function MenuBar() {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
+      <AppBar position="fixed" open={open} sx={{backgroundColor: theme.palette.primary.main}}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -162,7 +164,7 @@ export default function MenuBar() {
         </DrawerHeader>
         <Divider />
         <List>
-          {menuList.map((menu, index) => (
+          {menuList.map(menu => (
             <ListItem key={menu.text} disablePadding sx={{ display: 'block' }}>
               <ListItemButton
                 sx={[
@@ -195,62 +197,10 @@ export default function MenuBar() {
                         },
                   ]}
                 >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                  {menu.icon}
                 </ListItemIcon>
                 <ListItemText
                   primary={menu.text}
-                  sx={[
-                    open
-                      ? {
-                          opacity: 1,
-                        }
-                      : {
-                          opacity: 0,
-                        },
-                  ]}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-        <Divider />
-        <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-              <ListItemButton
-                sx={[
-                  {
-                    minHeight: 48,
-                    px: 2.5,
-                  },
-                  open
-                    ? {
-                        justifyContent: 'initial',
-                      }
-                    : {
-                        justifyContent: 'center',
-                      },
-                ]}
-              >
-                <ListItemIcon
-                  sx={[
-                    {
-                      minWidth: 0,
-                      justifyContent: 'center',
-                    },
-                    open
-                      ? {
-                          mr: 3,
-                        }
-                      : {
-                          mr: 'auto',
-                        },
-                  ]}
-                >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText
-                  primary={text}
                   sx={[
                     open
                       ? {

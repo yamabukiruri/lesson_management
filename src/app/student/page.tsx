@@ -8,6 +8,7 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { CardTitle } from "@/components/title";
 import { MainBtn } from "@/components/button";
 import { useRouter } from "next/navigation";
+import { theme } from "@/library/theme";
 
 export default function Student() {
   const router = useRouter();
@@ -50,7 +51,7 @@ export default function Student() {
             <TableBody>
               {students.map((student, index) => (
                 <TableRow key={index}>
-                  <TableCell sx={{textAlign: 'center'}}><Link href={"/student/" + student.docId}>{student.lastName + ' ' + student.firstName}</Link></TableCell>
+                  <TableCell sx={{textAlign: 'center'}}><Link href={"/student/" + student.docId} sx={{color: theme.palette.primary.main, fontWeight: 'bold'}}>{student.lastName + ' ' + student.firstName}</Link></TableCell>
                   <TableCell sx={{textAlign: 'center'}}>{student.age}</TableCell>
                   <TableCell sx={{textAlign: 'center'}}>{student.attendedDate.length + student.absentDate.length + ' / ' + student.maxCount}</TableCell>
                 </TableRow>
@@ -59,8 +60,8 @@ export default function Student() {
           </Table>
         </TableContainer>
       </Panel>
-      <Box sx={{display: 'flex', alignItems: '', justifyContent: 'right'}}>
-          <MainBtn label="新規生徒登録" onClick={() => {router.push('student/0')}} />
+      <Box sx={{display: 'flex', alignItems: '', justifyContent: 'center'}}>
+          <MainBtn label="新規生徒登録" sx={{width: 160}} onClick={() => {router.push('student/0')}} />
       </Box>
     </Box>
   );

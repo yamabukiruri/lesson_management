@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Timestamp, collection, getDocs, onSnapshot, query, where, doc, updateDoc } from "firebase/firestore"; 
 import { CardTitle } from "@/components/title";
 import { MainBtn } from "@/components/button";
+import { theme } from "@/library/theme";
 
 export default function Home() {
   const [students, setStudents] = useState<{ [x: string]: any; }[]>([]);
@@ -121,7 +122,7 @@ export default function Home() {
                 {students.map((student, index) => (
                   <TableRow key={index}>
                     <TableCell sx={{textAlign: 'center'}}>{student.docData.date.split(' ')[1]}</TableCell>
-                    <TableCell sx={{textAlign: 'center'}}><Link href={"/student/" + student.docId}>{student.docData.lastName + ' ' + student.docData.firstName}</Link></TableCell>
+                    <TableCell sx={{textAlign: 'center'}}><Link href={"/student/" + student.docId} sx={{color: theme.palette.primary.main, fontWeight: 'bold'}}>{student.docData.lastName + ' ' + student.docData.firstName}</Link></TableCell>
                     <TableCell sx={{textAlign: 'center'}}>
                       {student.docData.isAttendedToday ? '出席' 
                         : student.docData.isAbsentToday ? '欠席' 
@@ -155,7 +156,7 @@ export default function Home() {
               {forgottenStudents.map((forgottenStudent, index) => (
                 <TableRow key={index}>
                   <TableCell sx={{textAlign: 'center'}}>{forgottenStudent.docData.date}</TableCell>
-                  <TableCell sx={{textAlign: 'center'}}><Link href={"/student/" + forgottenStudent.docId}>{forgottenStudent.docData.lastName + ' ' + forgottenStudent.docData.firstName}</Link></TableCell>
+                  <TableCell sx={{textAlign: 'center'}}><Link href={"/student/" + forgottenStudent.docId} sx={{color: theme.palette.primary.main, fontWeight: 'bold'}}>{forgottenStudent.docData.lastName + ' ' + forgottenStudent.docData.firstName}</Link></TableCell>
                   <TableCell sx={{textAlign: 'center'}}>
                     <MainBtn label="出席" onClick={() => {updateAttendance(forgottenStudent.docId, forgottenStudent.docData.attendedDate, forgottenStudent.docData.schedule)}} />
                     <MainBtn label="欠席" sx={{ml: 2}} onClick={() => {updateAbsence(forgottenStudent.docId, forgottenStudent.docData.absentDate, forgottenStudent.docData.schedule)}} />

@@ -11,6 +11,8 @@ import dayjs, { Dayjs } from 'dayjs';
 import { DateCalendar, LocalizationProvider, PickersDay } from '@mui/x-date-pickers';
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { MainBtn } from '@/components/button';
+import { theme } from '@/library/theme';
+import { CustomTextField } from '@/components/input';
 
 export default function StudentId() {
   const params = useParams();
@@ -142,10 +144,10 @@ export default function StudentId() {
         day={day}
         selected={selectedDate?.isSame(day, "day")}
         sx={{
-          backgroundColor: isAttended ? '#C7BFCA !important' : (selectedDate?.isSame(day, "day") && isScheduled) || isScheduled ? "#F4B9B9 !important" : "transparent !important",
+          backgroundColor: isAttended ? `${theme.palette.secondary.main} !important` : (selectedDate?.isSame(day, "day") && isScheduled) || isScheduled ? `${theme.palette.primary.light} !important` : "transparent !important",
           color: 'black !important',
           borderRadius: "50%",
-          border: isAbsent ? '1px dotted #C7BFCA !important' : undefined,
+          border: isAbsent ? `1px dotted ${theme.palette.secondary.main} !important` : undefined,
         }}
         onClick={() => handleCalendar(day)}
       />
@@ -187,9 +189,9 @@ export default function StudentId() {
             marginBottom: 3,
           }}
         >
-          <TextField label="姓" variant="filled" name="lastName" value={student.lastName} onChange={handleTextField} />
-          <TextField label="名" variant="filled" name="firstName" value={student.firstName} onChange={handleTextField} />
-          <TextField label="年齢" variant="filled" name="age" value={student.age} type="number" onChange={handleTextField} />
+          <CustomTextField label="姓" name="lastName" value={student.lastName} onChange={handleTextField} />
+          <CustomTextField label="名" name="firstName" value={student.firstName} onChange={handleTextField} />
+          <CustomTextField label="年齢" name="age" value={student.age} type="number" onChange={handleTextField} />
         </Box>
         <Divider />
         <Typography sx={{ marginTop: 2, marginBottom: 1 }}>レッスン情報</Typography>
@@ -202,8 +204,8 @@ export default function StudentId() {
             marginBottom: 3,
           }}
         >
-          <TextField label="レッスン開始日" variant="filled" name="startDate" value={student.startDate} type="date" onChange={handleTextField} />
-          <TextField label="年間レッスン回数上限" variant="filled" name="maxCount" value={student.maxCount} type="number" onChange={handleTextField} />
+          <CustomTextField label="レッスン開始日" name="startDate" value={student.startDate} type="date" onChange={handleTextField} />
+          <CustomTextField label="年間レッスン回数上限" name="maxCount" value={student.maxCount} type="number" onChange={handleTextField} />
           <Box
             sx={{
               display: 'flex',
@@ -211,9 +213,9 @@ export default function StudentId() {
               columnGap: 1,
             }}
           >
-            <TextField label="レッスン時間（時）" variant="filled" name="hour" value={student.hour} type="number" onChange={handleTextField} />
+            <CustomTextField label="レッスン時間（時）" name="hour" value={student.hour} type="number" onChange={handleTextField} />
             <Typography>：</Typography>
-            <TextField label="レッスン時間（分）" variant="filled" name="minute" value={student.minute} type="number" onChange={handleTextField} />
+            <CustomTextField label="レッスン時間（分）" name="minute" value={student.minute} type="number" onChange={handleTextField} />
             <Typography>〜</Typography>
           </Box>
         </Box>
@@ -229,7 +231,7 @@ export default function StudentId() {
         </LocalizationProvider>
       </Panel>
       <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-          <MainBtn label="保存" onClick={registData} />
+          <MainBtn label="保存" sx={{width: 160}} onClick={registData} />
       </Box>
     </Box>
   );
