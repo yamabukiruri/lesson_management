@@ -25,7 +25,8 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { MainBtn } from "@/components/button";
 import { theme } from "@/library/theme";
-import { CustomTextField } from "@/components/input";
+import { CustomPulldown, CustomTextField } from "@/components/input";
+import { prefList } from "@/library/fixedData";
 
 export default function StudentId() {
   const params = useParams();
@@ -44,6 +45,11 @@ export default function StudentId() {
     schedule: [],
     hour: 0,
     minute: 0,
+    gender: 0,
+    pref: 0,
+    city: "",
+    street: "",
+    building: "",
   });
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null); //カレンダーで選択した値
   const [attendedDateList, setAttendedDateList] = useState<Dayjs[]>([]); //今までの出席日
@@ -80,50 +86,10 @@ export default function StudentId() {
 
   const handleTextField = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    switch (name) {
-      case "lastName":
-        setStudent((prevState) => ({
-          ...prevState,
-          lastName: value,
-        }));
-        break;
-      case "firstName":
-        setStudent((prevState) => ({
-          ...prevState,
-          firstName: value,
-        }));
-        break;
-      case "age":
-        setStudent((prevState) => ({
-          ...prevState,
-          age: value,
-        }));
-        break;
-      case "startDate":
-        setStudent((prevState) => ({
-          ...prevState,
-          startDate: value,
-        }));
-        break;
-      case "maxCount":
-        setStudent((prevState) => ({
-          ...prevState,
-          maxCount: value,
-        }));
-        break;
-      case "hour":
-        setStudent((prevState) => ({
-          ...prevState,
-          hour: value,
-        }));
-        break;
-      case "minute":
-        setStudent((prevState) => ({
-          ...prevState,
-          minute: value,
-        }));
-        break;
-    }
+    setStudent((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
   };
 
   const handleCalendar = (day: Dayjs) => {
@@ -285,6 +251,65 @@ export default function StudentId() {
             name="age"
             value={student.age}
             type="number"
+            onChange={handleTextField}
+          />
+          <CustomPulldown
+            label="性別"
+            name="gender"
+            value={student.gender}
+            options={[
+              { id: 0, name: "未選択" },
+              { id: 1, name: "男" },
+              { id: 2, name: "女" },
+            ]}
+            onChange={(newValue: number) => {
+              setStudent((prevState) => ({
+                ...prevState,
+                gender: newValue,
+              }));
+            }}
+          />
+        </Box>
+        <Divider />
+        <Typography sx={{ marginTop: 2, marginBottom: 1 }}>住所</Typography>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(2, 1fr)",
+            rowGap: 2,
+            columnGap: 3,
+            marginBottom: 3,
+          }}
+        >
+          <CustomPulldown
+            label="都道府県"
+            name="pref"
+            value={student.pref}
+            options={prefList}
+            onChange={(newValue: number) => {
+              setStudent((prevState) => ({
+                ...prevState,
+                pref: newValue,
+              }));
+            }}
+          />
+          <Box />
+          <CustomTextField
+            label="市区町村"
+            name="city"
+            value={student.city}
+            onChange={handleTextField}
+          />
+          <CustomTextField
+            label="番地"
+            name="street"
+            value={student.street}
+            onChange={handleTextField}
+          />
+          <CustomTextField
+            label="ビル名・部屋番号"
+            name="building"
+            value={student.building}
             onChange={handleTextField}
           />
         </Box>
