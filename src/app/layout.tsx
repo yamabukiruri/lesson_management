@@ -29,11 +29,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Box sx={{display: "flex"}}>
+        <Box sx={{ display: "flex" }}>
           <MenuBar />
-          <main>
-            {children}
-          </main>
+          <main>{children}</main>
         </Box>
       </body>
     </html>

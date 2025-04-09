@@ -5,11 +5,13 @@ interface MainBtnProps {
   label: string;
   sx?: SxProps;
   onClick: () => void;
-};
+}
 
-export function MainBtn ({label, sx, onClick}: MainBtnProps) {
-  const defaultSx = {backgroundColor: theme.palette.primary.main};
+export function MainBtn({ label, sx, onClick }: MainBtnProps) {
+  const defaultSx = { backgroundColor: theme.palette.primary.main };
   return (
-    <Button variant="contained" onClick={onClick} sx={{...defaultSx, ...sx}}>{label}</Button>
+    <Button variant="contained" onClick={onClick} sx={{ ...defaultSx, ...sx }}>
+      {label}
+    </Button>
   );
-};
+}

@@ -1,5 +1,5 @@
-import { PropsWithChildren } from 'react';
-import { Card, SxProps } from '@mui/material';
+import { PropsWithChildren } from "react";
+import { Card, SxProps } from "@mui/material";
 
 interface PanelProps {
   sx?: SxProps;
@@ -7,9 +7,9 @@ interface PanelProps {
 
 export default function Panel({ children, sx }: PropsWithChildren<PanelProps>) {
   const defaultSx = {
-    marginBottom: '32px',
-    padding: '16px',
-    alignSelf: 'start',
+    marginBottom: "32px",
+    padding: "16px",
+    alignSelf: "start",
   };
 
   return <Card sx={{ ...defaultSx, ...sx }}>{children}</Card>;
