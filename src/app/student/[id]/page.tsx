@@ -1,14 +1,13 @@
 "use client";
 
 import Panel from "@/components/panel";
-import { Box, Divider, TextField, Typography } from "@mui/material";
-import db from "../../../firebase";
+import { Box, Divider, Typography } from "@mui/material";
+import { db } from "../../../firebase";
 import { ChangeEvent, useEffect, useState } from "react";
 import {
   doc,
   getDoc,
   DocumentData,
-  setDoc,
   updateDoc,
   Timestamp,
   collection,

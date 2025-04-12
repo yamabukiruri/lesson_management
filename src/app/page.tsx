@@ -12,18 +12,9 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import db from "../firebase";
+import { db } from "../firebase";
 import { useEffect, useState } from "react";
-import {
-  Timestamp,
-  collection,
-  getDocs,
-  onSnapshot,
-  query,
-  where,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
+import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
 import { CardTitle } from "@/components/title";
 import { MainBtn } from "@/components/button";
 import { theme } from "@/library/theme";
