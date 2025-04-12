@@ -20,6 +20,7 @@ import { MainBtn } from "@/components/button";
 import { theme } from "@/library/theme";
 import { useAuth } from "./context/authContext";
 import { useRouter } from "next/navigation";
+import Loading from "@/components/loading";
 
 export default function Home() {
   const { user, loading, signOut } = useAuth();
@@ -37,6 +38,7 @@ export default function Home() {
   }, [user, loading, router]);
 
   useEffect(() => {
+    if (!user) return;
     //リアルタイムでデータ更新
     const unsubscribe = onSnapshot(
       collection(db, "students"),
@@ -110,7 +112,7 @@ export default function Home() {
 
     // クリーンアップ関数
     return () => unsubscribe();
-  }, []);
+  }, [user]);
   // console.log(students.map(student => student.docData));
 
   //出席登録
@@ -140,7 +142,7 @@ export default function Home() {
   };
 
   if (loading) {
-    return <Box>読み込み中...</Box>;
+    return <Loading />;
   }
 
   if (!user) {

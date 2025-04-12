@@ -19,6 +19,7 @@ import { MainBtn } from "@/components/button";
 import { useRouter } from "next/navigation";
 import { theme } from "@/library/theme";
 import { useAuth } from "../context/authContext";
+import Loading from "@/components/loading";
 
 export default function Student() {
   const { user, loading, signOut } = useAuth();
@@ -32,6 +33,7 @@ export default function Student() {
   }, [user, loading, router]);
 
   useEffect(() => {
+    if (!user) return;
     //リアルタイムでデータ更新
     const unsubscribe = onSnapshot(
       collection(db, "students"),
@@ -53,10 +55,10 @@ export default function Student() {
 
     // クリーンアップ関数
     return () => unsubscribe();
-  }, []);
+  }, [user]);
 
   if (loading) {
-    return <Box>読み込み中...</Box>;
+    return <Loading />;
   }
 
   if (!user) {

@@ -4,6 +4,7 @@ import { Box, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "../context/authContext";
+import Loading from "@/components/loading";
 
 export default function NotFound() {
   const { user, loading, signOut } = useAuth();
@@ -16,7 +17,7 @@ export default function NotFound() {
   }, [user, loading, router]);
 
   if (loading) {
-    return <Box>読み込み中...</Box>;
+    return <Loading />;
   }
 
   if (!user) {

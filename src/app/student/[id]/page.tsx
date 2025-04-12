@@ -27,6 +27,7 @@ import { theme } from "@/library/theme";
 import { CustomPulldown, CustomTextField } from "@/components/input";
 import { prefList } from "@/library/fixedData";
 import { useAuth } from "@/app/context/authContext";
+import Loading from "@/components/loading";
 
 export default function StudentId() {
   const { user, loading, signOut } = useAuth();
@@ -63,6 +64,7 @@ export default function StudentId() {
   }, [user, loading, router]);
 
   useEffect(() => {
+    if (!user) return;
     if (id !== "0") {
       const fetchStudent = async () => {
         const docRef = doc(db, "students", id);
@@ -89,7 +91,7 @@ export default function StudentId() {
       };
       fetchStudent();
     }
-  }, []);
+  }, [user]);
 
   const handleTextField = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -228,7 +230,7 @@ export default function StudentId() {
   };
 
   if (loading) {
-    return <Box>読み込み中...</Box>;
+    return <Loading />;
   }
 
   if (!user) {
