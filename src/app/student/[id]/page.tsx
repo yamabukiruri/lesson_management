@@ -26,8 +26,10 @@ import { MainBtn } from "@/components/button";
 import { theme } from "@/library/theme";
 import { CustomPulldown, CustomTextField } from "@/components/input";
 import { prefList } from "@/library/fixedData";
+import { useAuth } from "@/app/context/authContext";
 
 export default function StudentId() {
+  const { user, loading, signOut } = useAuth();
   const params = useParams();
   const id = params["id"] as string;
   const router = useRouter();
@@ -53,6 +55,12 @@ export default function StudentId() {
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null); //カレンダーで選択した値
   const [attendedDateList, setAttendedDateList] = useState<Dayjs[]>([]); //今までの出席日
   const [absentDateList, setAbsentDateList] = useState<Dayjs[]>([]); //今までの欠席日
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
 
   useEffect(() => {
     if (id !== "0") {
@@ -218,6 +226,14 @@ export default function StudentId() {
     }
     router.back();
   };
+
+  if (loading) {
+    return <Box>読み込み中...</Box>;
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <Box sx={{ width: "100%" }}>

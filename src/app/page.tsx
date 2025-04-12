@@ -18,12 +18,23 @@ import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
 import { CardTitle } from "@/components/title";
 import { MainBtn } from "@/components/button";
 import { theme } from "@/library/theme";
+import { useAuth } from "./context/authContext";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const { user, loading, signOut } = useAuth();
+  const router = useRouter();
+
   const [students, setStudents] = useState<{ [x: string]: any }[]>([]);
   const [forgottenStudents, setForgottenStudents] = useState<
     { [x: string]: any }[]
   >([]);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
 
   useEffect(() => {
     //リアルタイムでデータ更新
@@ -127,6 +138,14 @@ export default function Home() {
       schedule: schedule.slice(1),
     });
   };
+
+  if (loading) {
+    return <Box>読み込み中...</Box>;
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <Box sx={{ width: "100%" }}>

@@ -18,10 +18,18 @@ import { CardTitle } from "@/components/title";
 import { MainBtn } from "@/components/button";
 import { useRouter } from "next/navigation";
 import { theme } from "@/library/theme";
+import { useAuth } from "../context/authContext";
 
 export default function Student() {
+  const { user, loading, signOut } = useAuth();
   const router = useRouter();
   const [students, setStudents] = useState<{ [x: string]: any }[]>([]);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
 
   useEffect(() => {
     //リアルタイムでデータ更新
@@ -46,6 +54,14 @@ export default function Student() {
     // クリーンアップ関数
     return () => unsubscribe();
   }, []);
+
+  if (loading) {
+    return <Box>読み込み中...</Box>;
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <Box sx={{ width: "100%" }}>

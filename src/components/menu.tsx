@@ -22,6 +22,8 @@ import PianoRoundedIcon from "@mui/icons-material/PianoRounded";
 import SentimentSatisfiedAltRoundedIcon from "@mui/icons-material/SentimentSatisfiedAltRounded";
 import { useRouter } from "next/navigation";
 import { theme } from "@/library/theme";
+import { useAuth } from "@/app/context/authContext";
+import { useEffect } from "react";
 
 const drawerWidth = 240;
 
@@ -121,7 +123,15 @@ const menuList = [
 ];
 
 export default function MenuBar() {
+  const { user, loading, signOut } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
+
   const [open, setOpen] = React.useState(false);
 
   const handleDrawerOpen = () => {
@@ -131,6 +141,10 @@ export default function MenuBar() {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+
+  if (!user) {
+    return <Box />;
+  }
 
   return (
     <Box sx={{ display: "flex" }}>
