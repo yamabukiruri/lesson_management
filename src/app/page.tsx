@@ -41,7 +41,7 @@ export default function Home() {
     if (!user) return;
     //リアルタイムでデータ更新
     const unsubscribe = onSnapshot(
-      collection(db, "students"),
+      collection(db, "users", user.uid, "students"),
       (querySnapshot) => {
         try {
           // 今日の開始と終了時間を作成
@@ -121,7 +121,8 @@ export default function Home() {
     attendedDate: string[],
     schedule: string[]
   ) => {
-    const docRef = doc(db, "students", id);
+    if (!user) return;
+    const docRef = doc(db, "users", user.uid, "students", id);
     await updateDoc(docRef, {
       attendedDate: [...attendedDate, schedule[0]],
       schedule: schedule.slice(1),
@@ -134,7 +135,8 @@ export default function Home() {
     absentDate: string[],
     schedule: string[]
   ) => {
-    const docRef = doc(db, "students", id);
+    if (!user) return;
+    const docRef = doc(db, "users", user.uid, "students", id);
     await updateDoc(docRef, {
       absentDate: [...absentDate, schedule[0]],
       schedule: schedule.slice(1),

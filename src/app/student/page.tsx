@@ -36,7 +36,7 @@ export default function Student() {
     if (!user) return;
     //リアルタイムでデータ更新
     const unsubscribe = onSnapshot(
-      collection(db, "students"),
+      collection(db, "users", user.uid, "students"),
       (querySnapshot) => {
         try {
           // データ整形

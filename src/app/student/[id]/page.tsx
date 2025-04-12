@@ -67,7 +67,7 @@ export default function StudentId() {
     if (!user) return;
     if (id !== "0") {
       const fetchStudent = async () => {
-        const docRef = doc(db, "students", id);
+        const docRef = doc(db, "users", user.uid, "students", id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
@@ -179,9 +179,10 @@ export default function StudentId() {
   };
 
   const registData = async () => {
+    if (!user) return;
     //新規作成
     if (id === "0") {
-      const docRef = collection(db, "students");
+      const docRef = collection(db, "users", user.uid, "students");
       await addDoc(docRef, {
         ...student,
         startDate: Timestamp.fromDate(
@@ -204,7 +205,7 @@ export default function StudentId() {
       });
       //更新
     } else {
-      const docRef = doc(db, "students", id);
+      const docRef = doc(db, "users", user.uid, "students", id);
       await updateDoc(docRef, {
         ...student,
         startDate: Timestamp.fromDate(

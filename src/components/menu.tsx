@@ -20,10 +20,13 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import PianoRoundedIcon from "@mui/icons-material/PianoRounded";
 import SentimentSatisfiedAltRoundedIcon from "@mui/icons-material/SentimentSatisfiedAltRounded";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { useRouter } from "next/navigation";
 import { theme } from "@/library/theme";
 import { useAuth } from "@/app/context/authContext";
 import { useEffect } from "react";
+import { Button } from "@mui/material";
+import { auth } from "@/firebase";
 
 const drawerWidth = 240;
 
@@ -152,26 +155,51 @@ export default function MenuBar() {
       <AppBar
         position="fixed"
         open={open}
-        sx={{ backgroundColor: theme.palette.primary.main }}
+        sx={{
+          backgroundColor: theme.palette.primary.main,
+        }}
       >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            sx={[
-              {
-                marginRight: 5,
-              },
-              open && { display: "none" },
-            ]}
+        <Toolbar sx={{ justifyContent: "space-between" }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+            }}
           >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Lesson Manager
-          </Typography>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={handleDrawerOpen}
+              edge="start"
+              sx={[
+                {
+                  marginRight: 5,
+                },
+                open && { display: "none" },
+              ]}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" noWrap component="div">
+              Lesson Manager
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Button
+              sx={{ color: "inherit", gap: 1 }}
+              onClick={() => auth.signOut()}
+            >
+              <LogoutIcon />
+              <Typography sx={{ color: "inherit", fontWeight: "bold" }}>
+                ログアウト
+              </Typography>
+            </Button>
+          </Box>
         </Toolbar>
       </AppBar>
       <Drawer variant="permanent" open={open}>
