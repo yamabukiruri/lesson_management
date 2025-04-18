@@ -21,10 +21,32 @@ import { theme } from "@/library/theme";
 import { useAuth } from "../context/authContext";
 import Loading from "@/components/loading";
 
+export interface Student {
+  absentDate: string[];
+  age: number;
+  attendedDate: string[];
+  building: string;
+  city: string;
+  firstName: string;
+  gender: number;
+  hour: string;
+  lastName: string;
+  maxCount: string;
+  minute: string;
+  pref: string;
+  schedule: string[];
+  startDate: string;
+  street: string;
+}
+
+interface Doc extends Student {
+  docId: string;
+}
+
 export default function Student() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
-  const [students, setStudents] = useState<{ [x: string]: any }[]>([]);
+  const [students, setStudents] = useState<Doc[]>([]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -41,8 +63,25 @@ export default function Student() {
         try {
           // データ整形
           const fetchedStudents = querySnapshot.docs.map((doc) => {
-            const data = doc.data();
-            return { docId: doc.id, ...data };
+            const data = doc.data() as Student; // 型アサーション
+            return {
+              docId: doc.id,
+              absentDate: data.absentDate || [],
+              age: data.age || 0,
+              attendedDate: data.attendedDate || [],
+              building: data.building || "",
+              city: data.city || "",
+              firstName: data.firstName || "",
+              gender: data.gender || 0,
+              hour: data.hour || "",
+              lastName: data.lastName || "",
+              maxCount: data.maxCount || "",
+              minute: data.minute || "",
+              pref: data.pref || "",
+              schedule: data.schedule || [],
+              startDate: data.startDate || "",
+              street: data.street || "",
+            };
           });
 
           // 状態を更新

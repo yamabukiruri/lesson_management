@@ -21,15 +21,27 @@ import { theme } from "@/library/theme";
 import { useAuth } from "./context/authContext";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/loading";
+import { Student } from "./student/page";
+
+interface FormattedStudent extends Student {
+  isToday: boolean | string;
+  date: string;
+  isAttendedToday: boolean | string;
+  isAbsentToday: boolean | string;
+  isForgotten: boolean | string;
+}
+
+interface Doc {
+  docId: string;
+  docData: FormattedStudent;
+}
 
 export default function Home() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
-  const [students, setStudents] = useState<{ [x: string]: any }[]>([]);
-  const [forgottenStudents, setForgottenStudents] = useState<
-    { [x: string]: any }[]
-  >([]);
+  const [students, setStudents] = useState<Doc[]>([]);
+  const [forgottenStudents, setForgottenStudents] = useState<Doc[]>([]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -51,7 +63,7 @@ export default function Home() {
 
           // データ整形
           const formattedStudents = querySnapshot.docs.map((doc) => {
-            const data = doc.data();
+            const data = doc.data() as Student; // 型アサーション
             const schedule = data?.schedule || [];
             const attendedDate = data?.attendedDate || [];
             const absentDate = data?.absentDate || [];
@@ -59,23 +71,28 @@ export default function Home() {
             // 本日出欠登録済みか判定
             const isAttendedToday =
               attendedDate.length > 0 &&
+              attendedDate[attendedDate.length - 1] && // 配列の要素が存在するか確認
               new Date(attendedDate[attendedDate.length - 1]) >= startOfToday &&
               new Date(attendedDate[attendedDate.length - 1]) <= endOfToday;
 
             const isAbsentToday =
               absentDate.length > 0 &&
+              absentDate[absentDate.length - 1] && // 配列の要素が存在するか確認
               new Date(absentDate[absentDate.length - 1]) >= startOfToday &&
               new Date(absentDate[absentDate.length - 1]) <= endOfToday;
 
             // 本日出席予定で、まだ出席登録をしていない生徒か判定
             const isToday =
               schedule.length > 0 &&
+              schedule[0] && // 配列の要素が存在するか確認
               new Date(schedule[0]) >= startOfToday &&
               new Date(schedule[0]) <= endOfToday;
 
             // 昨日以前の出席登録を忘れていないか判定
             const isForgotten =
-              schedule.length > 0 && new Date(schedule[0]) < startOfToday;
+              schedule.length > 0 &&
+              schedule[0] && // 配列の要素が存在するか確認
+              new Date(schedule[0]) < startOfToday;
 
             return {
               docId: doc.id,

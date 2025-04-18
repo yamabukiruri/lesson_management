@@ -30,7 +30,7 @@ import { useAuth } from "@/app/context/authContext";
 import Loading from "@/components/loading";
 
 export default function StudentId() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const params = useParams();
   const id = params["id"] as string;
   const router = useRouter();
@@ -61,9 +61,6 @@ export default function StudentId() {
     if (!loading && !user) {
       router.push("/login");
     }
-  }, [user, loading, router]);
-
-  useEffect(() => {
     if (!user) return;
     if (id !== "0") {
       const fetchStudent = async () => {
@@ -91,7 +88,7 @@ export default function StudentId() {
       };
       fetchStudent();
     }
-  }, [user]);
+  }, [user, loading, router, id]);
 
   const handleTextField = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

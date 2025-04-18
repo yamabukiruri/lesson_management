@@ -7,7 +7,7 @@ import { useAuth } from "../context/authContext";
 import Loading from "@/components/loading";
 
 export default function NotFound() {
-  const { user, loading, signOut } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
