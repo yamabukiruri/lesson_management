@@ -11,6 +11,8 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@fontsource/comic-neue": "^5.2.5",
+    "@fontsource/zen-maru-gothic": "^5.2.5",
     "@mui/icons-material": "^6.4.3",
     "@mui/material": "^6.4.0",
     "@mui/x-date-pickers": "^7.26.0",

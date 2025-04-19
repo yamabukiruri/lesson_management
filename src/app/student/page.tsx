@@ -6,7 +6,6 @@ import {
   Link,
   Table,
   TableBody,
-  TableCell,
   TableContainer,
   TableHead,
   TableRow,
@@ -20,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { theme } from "@/library/theme";
 import { useAuth } from "../context/authContext";
 import Loading from "@/components/loading";
+import CustomTableCell from "@/components/tableCell";
 
 export interface Student {
   absentDate: string[];
@@ -112,17 +112,15 @@ export default function Student() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ textAlign: "center" }}>名前</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>年齢</TableCell>
-                <TableCell sx={{ textAlign: "center" }}>
-                  登録レッスン回数
-                </TableCell>
+                <CustomTableCell>名前</CustomTableCell>
+                <CustomTableCell>年齢</CustomTableCell>
+                <CustomTableCell>登録レッスン回数</CustomTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {students.map((student, index) => (
                 <TableRow key={index}>
-                  <TableCell sx={{ textAlign: "center" }}>
+                  <CustomTableCell>
                     <Link
                       href={"/student/" + student.docId}
                       sx={{
@@ -132,16 +130,14 @@ export default function Student() {
                     >
                       {student.lastName + " " + student.firstName}
                     </Link>
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    {student.age}
-                  </TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
+                  </CustomTableCell>
+                  <CustomTableCell>{student.age}</CustomTableCell>
+                  <CustomTableCell>
                     {student.attendedDate.length +
                       student.absentDate.length +
                       " / " +
                       student.maxCount}
-                  </TableCell>
+                  </CustomTableCell>
                 </TableRow>
               ))}
             </TableBody>

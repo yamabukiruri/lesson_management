@@ -1,13 +1,13 @@
 import { theme } from "@/library/theme";
 import {
+  TextField,
+  SxProps,
   Box,
   FormControl,
   InputLabel,
   MenuItem,
   Select,
   SelectChangeEvent,
-  SxProps,
-  TextField,
 } from "@mui/material";
 import { ChangeEvent } from "react";
 
@@ -30,20 +30,29 @@ export function CustomTextField({
 }: CustomTextFieldProps) {
   const defaultSx = {
     "& .MuiFilledInput-root": {
-      backgroundColor: theme.palette.secondary.light, // 通常時の背景色
+      backgroundColor: theme.palette.secondary.light,
+      borderRadius: "8px",
+      height: "56px", // 統一高さ
+      transition: "all 0.3s ease",
+      "&:hover": {
+        backgroundColor: theme.palette.primary.light,
+      },
+      "&.Mui-focused": {
+        backgroundColor: theme.palette.secondary.main,
+      },
       "&:after": {
-        borderBottom: `3px solid ${theme.palette.primary.light}`, // フォーカス時の下線の色
+        borderBottom: `2px solid ${theme.palette.primary.main}`,
       },
     },
     "& .MuiInputLabel-root": {
-      color: "gray", // 通常時のラベル色
-      fontWeight: "bold",
+      color: "#888",
+      fontWeight: 600,
     },
     "& .MuiInputLabel-root.Mui-focused": {
-      color: theme.palette.primary.light, // フォーカス時のラベル色
-      fontWeight: "bold",
+      color: theme.palette.primary.main,
     },
   };
+
   return (
     <TextField
       label={label}
@@ -53,6 +62,7 @@ export function CustomTextField({
       type={type}
       sx={{ ...defaultSx, ...sx }}
       onChange={onChange}
+      fullWidth
     />
   );
 }
@@ -76,18 +86,26 @@ export function CustomPulldown({
 }: CustomPulldownProps) {
   const defaultSx = {
     "& .MuiFilledInput-root": {
-      backgroundColor: theme.palette.secondary.light, // 通常時の背景色
+      backgroundColor: theme.palette.secondary.light,
+      borderRadius: "8px",
+      height: "56px", // TextField と統一
+      transition: "all 0.3s ease",
+      "&:hover": {
+        backgroundColor: theme.palette.primary.light,
+      },
+      "&.Mui-focused": {
+        backgroundColor: theme.palette.secondary.main,
+      },
       "&:after": {
-        borderBottom: `3px solid ${theme.palette.primary.light}`, // フォーカス時の下線の色
+        borderBottom: `2px solid ${theme.palette.primary.main}`,
       },
     },
     "& .MuiInputLabel-root": {
-      color: "gray", // 通常時のラベル色
-      fontWeight: "bold",
+      color: "#888",
+      fontWeight: 600,
     },
     "& .MuiInputLabel-root.Mui-focused": {
-      color: theme.palette.primary.light, // フォーカス時のラベル色
-      fontWeight: "bold",
+      color: theme.palette.primary.main,
     },
   };
 
@@ -98,15 +116,27 @@ export function CustomPulldown({
   return (
     <Box sx={{ minWidth: 120 }}>
       <FormControl variant="filled" fullWidth sx={{ ...defaultSx, ...sx }}>
-        <InputLabel>{label}</InputLabel>
-        <Select
-          value={value}
-          name={name}
-          label={label}
-          onChange={handleSelectChange}
-        >
+        <InputLabel sx={{ fontFamily: theme.typography.fontFamily }}>
+          {label}
+        </InputLabel>
+        <Select value={value} name={name} onChange={handleSelectChange}>
           {options.map((option) => (
-            <MenuItem key={option.id} value={option.id}>
+            <MenuItem
+              key={option.id}
+              value={option.id}
+              sx={{
+                "&:hover": {
+                  backgroundColor: theme.palette.primary.light,
+                },
+                "&.Mui-selected": {
+                  backgroundColor: theme.palette.primary.main,
+                  color: "#fff",
+                },
+                "&.Mui-selected:hover": {
+                  backgroundColor: theme.palette.primary.dark,
+                },
+              }}
+            >
               {option.name}
             </MenuItem>
           ))}

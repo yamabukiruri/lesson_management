@@ -159,15 +159,17 @@ export default function StudentId() {
         day={day}
         selected={selectedDate?.isSame(day, "day")}
         sx={{
+          fontFamily: theme.typography.fontFamily,
+          fontWeight: 700,
           backgroundColor: isAttended
             ? `${theme.palette.secondary.main} !important`
             : (selectedDate?.isSame(day, "day") && isScheduled) || isScheduled
-            ? `${theme.palette.primary.light} !important`
+            ? `${theme.palette.primary.main} !important`
             : "transparent !important",
           color: "black !important",
           borderRadius: "50%",
           border: isAbsent
-            ? `1px dotted ${theme.palette.secondary.main} !important`
+            ? `1px dotted ${theme.palette.primary.main} !important`
             : undefined,
         }}
         onClick={() => handleCalendar(day)}
@@ -239,7 +241,11 @@ export default function StudentId() {
     <Box sx={{ width: "100%" }}>
       <Panel>
         <CardTitle label="生徒情報" />
-        <Typography sx={{ marginBottom: 1 }}>基本情報</Typography>
+        <Typography
+          sx={{ marginBottom: 1, fontFamily: theme.typography.fontFamily }}
+        >
+          基本情報
+        </Typography>
         <Box
           sx={{
             display: "grid",
@@ -286,7 +292,15 @@ export default function StudentId() {
           />
         </Box>
         <Divider />
-        <Typography sx={{ marginTop: 2, marginBottom: 1 }}>住所</Typography>
+        <Typography
+          sx={{
+            marginTop: 2,
+            marginBottom: 1,
+            fontFamily: theme.typography.fontFamily,
+          }}
+        >
+          住所
+        </Typography>
         <Box
           sx={{
             display: "grid",
@@ -329,7 +343,13 @@ export default function StudentId() {
           />
         </Box>
         <Divider />
-        <Typography sx={{ marginTop: 2, marginBottom: 1 }}>
+        <Typography
+          sx={{
+            marginTop: 2,
+            marginBottom: 1,
+            fontFamily: theme.typography.fontFamily,
+          }}
+        >
           レッスン情報
         </Typography>
         <Box
@@ -381,7 +401,13 @@ export default function StudentId() {
           </Box>
         </Box>
         <Divider />
-        <Typography sx={{ marginTop: 2, marginBottom: 1 }}>
+        <Typography
+          sx={{
+            marginTop: 2,
+            marginBottom: 1,
+            fontFamily: theme.typography.fontFamily,
+          }}
+        >
           今回分スケジュール
         </Typography>
         <LocalizationProvider dateAdapter={AdapterDayjs}>

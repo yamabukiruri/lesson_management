@@ -180,7 +180,13 @@ export default function MenuBar() {
             >
               <MenuIcon />
             </IconButton>
-            <Typography variant="h6" noWrap component="div">
+            <Typography
+              variant="h6"
+              noWrap
+              component="div"
+              fontFamily={theme.typography.fontFamily}
+              fontWeight={700}
+            >
               Lesson Manager
             </Typography>
           </Box>
@@ -195,7 +201,14 @@ export default function MenuBar() {
               onClick={() => auth.signOut()}
             >
               <LogoutIcon />
-              <Typography sx={{ color: "inherit", fontWeight: "bold" }}>
+              <Typography
+                sx={{
+                  color: "inherit",
+                  fontWeight: 700,
+                  display: { xs: "none", md: "block" },
+                  fontFamily: theme.typography.fontFamily,
+                }}
+              >
                 ログアウト
               </Typography>
             </Button>
@@ -254,6 +267,9 @@ export default function MenuBar() {
                 <ListItemText
                   primary={menu.text}
                   sx={[
+                    {
+                      fontFamily: `${theme.typography.fontFamily} !important`,
+                    },
                     open
                       ? {
                           opacity: 1,

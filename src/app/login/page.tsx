@@ -1,16 +1,16 @@
 "use client";
 
 import { MainBtn } from "@/components/button";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Paper } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "../context/authContext";
+import { theme } from "@/library/theme";
 
 export default function Login() {
   const { user, signInWithGoogle } = useAuth();
   const router = useRouter();
 
-  // ユーザーがログインしたら、ホームページにリダイレクト
   useEffect(() => {
     if (user) {
       router.push("/");
@@ -19,24 +19,34 @@ export default function Login() {
 
   return (
     <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
-      {user ? null : (
-        <Box
+      {!user && (
+        <Paper
+          elevation={6}
           sx={{
-            padding: 10,
-            width: "30%",
+            padding: { xs: 4, sm: 6 },
+            width: { xs: "90%", sm: "400px" },
+            borderRadius: 4,
             backgroundColor: "white",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center",
-            rowGap: 10,
-            borderRadius: 2,
+            alignItems: "center",
+            gap: 4,
           }}
         >
-          <Typography sx={{ fontSize: 40, color: "black" }}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              color: theme.palette.primary.dark,
+              textAlign: "center",
+              fontFamily: theme.typography.fontFamily,
+            }}
+          >
             Welcome to Lesson Manager!
           </Typography>
+
           <MainBtn label="サインイン" onClick={signInWithGoogle} />
-        </Box>
+        </Paper>
       )}
     </Box>
   );

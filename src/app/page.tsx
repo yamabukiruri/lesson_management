@@ -6,7 +6,6 @@ import {
   Link,
   Table,
   TableBody,
-  TableCell,
   TableContainer,
   TableHead,
   TableRow,
@@ -22,6 +21,7 @@ import { useAuth } from "./context/authContext";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/loading";
 import { Student } from "./student/page";
+import CustomTableCell from "@/components/tableCell";
 
 interface FormattedStudent extends Student {
   isToday: boolean | string;
@@ -177,21 +177,19 @@ export default function Home() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ textAlign: "center" }}>時間</TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>名前</TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>出席登録</TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>
-                    登録レッスン回数
-                  </TableCell>
+                  <CustomTableCell>時間</CustomTableCell>
+                  <CustomTableCell>名前</CustomTableCell>
+                  <CustomTableCell>出席登録</CustomTableCell>
+                  <CustomTableCell>登録レッスン回数</CustomTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {students.map((student, index) => (
                   <TableRow key={index}>
-                    <TableCell sx={{ textAlign: "center" }}>
+                    <CustomTableCell>
                       {student.docData.date.split(" ")[1]}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
+                    </CustomTableCell>
+                    <CustomTableCell>
                       <Link
                         href={"/student/" + student.docId}
                         sx={{
@@ -203,8 +201,8 @@ export default function Home() {
                           " " +
                           student.docData.firstName}
                       </Link>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
+                    </CustomTableCell>
+                    <CustomTableCell>
                       {student.docData.isAttendedToday ? (
                         "出席"
                       ) : student.docData.isAbsentToday ? (
@@ -234,13 +232,13 @@ export default function Home() {
                           />
                         </>
                       )}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
+                    </CustomTableCell>
+                    <CustomTableCell>
                       {student.docData.attendedDate.length +
                         student.docData.absentDate.length +
                         " / " +
                         student.docData.maxCount}
-                    </TableCell>
+                    </CustomTableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -255,18 +253,18 @@ export default function Home() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ textAlign: "center" }}>対象日時</TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>名前</TableCell>
-                  <TableCell sx={{ textAlign: "center" }}>出席登録</TableCell>
+                  <CustomTableCell>対象日時</CustomTableCell>
+                  <CustomTableCell>名前</CustomTableCell>
+                  <CustomTableCell>出席登録</CustomTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {forgottenStudents.map((forgottenStudent, index) => (
                   <TableRow key={index}>
-                    <TableCell sx={{ textAlign: "center" }}>
+                    <CustomTableCell>
                       {forgottenStudent.docData.date}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
+                    </CustomTableCell>
+                    <CustomTableCell>
                       <Link
                         href={"/student/" + forgottenStudent.docId}
                         sx={{
@@ -278,8 +276,8 @@ export default function Home() {
                           " " +
                           forgottenStudent.docData.firstName}
                       </Link>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>
+                    </CustomTableCell>
+                    <CustomTableCell>
                       <MainBtn
                         label="出席"
                         onClick={() => {
@@ -301,7 +299,7 @@ export default function Home() {
                           );
                         }}
                       />
-                    </TableCell>
+                    </CustomTableCell>
                   </TableRow>
                 ))}
               </TableBody>
