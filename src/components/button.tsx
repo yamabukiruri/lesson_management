@@ -1,6 +1,5 @@
 import { theme } from "@/library/theme";
 import { Button, SxProps, Theme } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 
 interface MainBtnProps {
   label: string;
