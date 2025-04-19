@@ -408,7 +408,7 @@ export default function StudentId() {
             fontFamily: theme.typography.fontFamily,
           }}
         >
-          今回分スケジュール
+          今年度分スケジュール
         </Typography>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateCalendar
