@@ -11,7 +11,7 @@ export function MainBtn({ label, sx, onClick }: MainBtnProps) {
   const defaultSx: SxProps<Theme> = {
     backgroundColor: theme.palette.primary.main,
     color: "#fff",
-    padding: "12px 24px",
+    padding: "12px 16px",
     borderRadius: "20px",
     fontWeight: 600,
     fontFamily: theme.typography.fontFamily,

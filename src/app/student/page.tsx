@@ -106,7 +106,7 @@ export default function Student() {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Panel>
+      <Panel sx={{ display: "grid" }}>
         <CardTitle label="生徒一覧" />
         <TableContainer sx={{ width: "100%" }}>
           <Table>

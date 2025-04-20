@@ -4,6 +4,7 @@ import Panel from "@/components/panel";
 import {
   Box,
   Link,
+  Stack,
   Table,
   TableBody,
   TableContainer,
@@ -203,9 +204,9 @@ export default function Home() {
   return (
     <Box sx={{ width: "100%" }}>
       {forgottenStudents.length === 0 ? (
-        <Panel>
+        <Panel sx={{ display: "grid" }}>
           <CardTitle label="本日の生徒" />
-          <TableContainer sx={{ width: "100%" }}>
+          <TableContainer sx={{ width: "100%", overflowX: "auto" }}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -263,7 +264,12 @@ export default function Home() {
                         ) : isFullCount ? (
                           "レッスン回数が上限に達しています"
                         ) : (
-                          <>
+                          <Stack
+                            direction={{ xs: "column", sm: "row" }}
+                            spacing={1}
+                            alignItems="center"
+                            justifyContent="center"
+                          >
                             <MainBtn
                               label="出席"
                               onClick={() => {
@@ -276,7 +282,7 @@ export default function Home() {
                             />
                             <MainBtn
                               label="欠席"
-                              sx={{ ml: 2 }}
+                              sx={{ ml: { md: 1, lg: 2 } }}
                               onClick={() => {
                                 updateAbsence(
                                   student.docId,
@@ -285,7 +291,7 @@ export default function Home() {
                                 );
                               }}
                             />
-                          </>
+                          </Stack>
                         )}
                       </CustomTableCell>
                       <CustomTableCell>
@@ -314,10 +320,10 @@ export default function Home() {
           </TableContainer>
         </Panel>
       ) : (
-        <Panel>
+        <Panel sx={{ display: "grid" }}>
           <CardTitle label="出席登録忘れ" />
           <Typography>以下の生徒の出席登録を行ってください。</Typography>
-          <TableContainer sx={{ width: "100%" }}>
+          <TableContainer sx={{ width: "100%", overflowX: "auto" }}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -371,7 +377,12 @@ export default function Home() {
                       </CustomTableCell>
                       <CustomTableCell>
                         {!isFullCount ? (
-                          <>
+                          <Stack
+                            direction={{ xs: "column", sm: "row" }}
+                            spacing={1}
+                            alignItems="center"
+                            justifyContent="center"
+                          >
                             <MainBtn
                               label="出席"
                               onClick={() => {
@@ -384,7 +395,6 @@ export default function Home() {
                             />
                             <MainBtn
                               label="欠席"
-                              sx={{ ml: 2 }}
                               onClick={() => {
                                 updateAbsence(
                                   forgottenStudent.docId,
@@ -393,7 +403,7 @@ export default function Home() {
                                 );
                               }}
                             />
-                          </>
+                          </Stack>
                         ) : (
                           "レッスン回数が上限に達しています"
                         )}
