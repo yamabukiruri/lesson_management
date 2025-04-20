@@ -107,6 +107,12 @@ export default function Home() {
             };
           });
 
+          formattedStudents.sort((a, b) => {
+            const timeA = new Date(a.docData.date).getTime();
+            const timeB = new Date(b.docData.date).getTime();
+            return timeA - timeB;
+          });
+
           // 状態を更新
           setStudents(
             formattedStudents.filter(
@@ -140,8 +146,13 @@ export default function Home() {
   ) => {
     if (!user) return;
     const docRef = doc(db, "users", user.uid, "students", id);
+
+    const updated = [...attendedDate, schedule[0]].sort(
+      (a, b) => new Date(a).getTime() - new Date(b).getTime()
+    );
+
     await updateDoc(docRef, {
-      attendedDate: [...attendedDate, schedule[0]],
+      attendedDate: updated,
       schedule: schedule.slice(1),
     });
   };
@@ -154,8 +165,13 @@ export default function Home() {
   ) => {
     if (!user) return;
     const docRef = doc(db, "users", user.uid, "students", id);
+
+    const updated = [...absentDate, schedule[0]].sort(
+      (a, b) => new Date(a).getTime() - new Date(b).getTime()
+    );
+
     await updateDoc(docRef, {
-      absentDate: [...absentDate, schedule[0]],
+      absentDate: updated,
       schedule: schedule.slice(1),
     });
   };
@@ -217,7 +233,14 @@ export default function Home() {
                       }}
                     >
                       <CustomTableCell>
-                        {student.docData.date.split(" ")[1]}
+                        {new Date(student.docData.date).toLocaleTimeString(
+                          "ja-JP",
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          }
+                        )}
                       </CustomTableCell>
                       <CustomTableCell>
                         <Link
@@ -322,7 +345,16 @@ export default function Home() {
                       }}
                     >
                       <CustomTableCell>
-                        {forgottenStudent.docData.date}
+                        {new Date(
+                          forgottenStudent.docData.date
+                        ).toLocaleTimeString("ja-JP", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: false,
+                        })}
                       </CustomTableCell>
                       <CustomTableCell>
                         <Link
