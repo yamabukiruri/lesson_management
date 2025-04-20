@@ -198,7 +198,11 @@ export default function MenuBar() {
           >
             <Button
               sx={{ color: "inherit", gap: 1 }}
-              onClick={() => auth.signOut()}
+              onClick={() => {
+                if (confirm("ログアウトしますか？")) {
+                  auth.signOut();
+                }
+              }}
             >
               <LogoutIcon />
               <Typography

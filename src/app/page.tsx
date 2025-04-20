@@ -160,6 +160,22 @@ export default function Home() {
     });
   };
 
+  //カウントリセット
+  const resetCount = async (id: string) => {
+    if (!user) return;
+    if (
+      !confirm(
+        "出欠登録をしたレッスン日を全て削除し、カウントを0にリセットします。よろしいですか？"
+      )
+    )
+      return;
+    const docRef = doc(db, "users", user.uid, "students", id);
+    await updateDoc(docRef, {
+      absentDate: [],
+      attendedDate: [],
+    });
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -181,66 +197,95 @@ export default function Home() {
                   <CustomTableCell>名前</CustomTableCell>
                   <CustomTableCell>出席登録</CustomTableCell>
                   <CustomTableCell>登録レッスン回数</CustomTableCell>
+                  <CustomTableCell>カウントリセット</CustomTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {students.map((student, index) => (
-                  <TableRow key={index}>
-                    <CustomTableCell>
-                      {student.docData.date.split(" ")[1]}
-                    </CustomTableCell>
-                    <CustomTableCell>
-                      <Link
-                        href={"/student/" + student.docId}
-                        sx={{
-                          color: theme.palette.primary.main,
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {student.docData.lastName +
-                          " " +
-                          student.docData.firstName}
-                      </Link>
-                    </CustomTableCell>
-                    <CustomTableCell>
-                      {student.docData.isAttendedToday ? (
-                        "出席"
-                      ) : student.docData.isAbsentToday ? (
-                        "欠席"
-                      ) : (
-                        <>
+                {students.map((student, index) => {
+                  const isFullCount =
+                    student.docData.attendedDate.length +
+                      student.docData.absentDate.length >=
+                    Number(student.docData.maxCount);
+
+                  return (
+                    <TableRow
+                      key={index}
+                      sx={{
+                        backgroundColor: isFullCount
+                          ? theme.palette.tertiary.light
+                          : undefined,
+                      }}
+                    >
+                      <CustomTableCell>
+                        {student.docData.date.split(" ")[1]}
+                      </CustomTableCell>
+                      <CustomTableCell>
+                        <Link
+                          href={"/student/" + student.docId}
+                          sx={{
+                            color: theme.palette.primary.main,
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {student.docData.lastName +
+                            " " +
+                            student.docData.firstName}
+                        </Link>
+                      </CustomTableCell>
+                      <CustomTableCell>
+                        {student.docData.isAttendedToday ? (
+                          "出席"
+                        ) : student.docData.isAbsentToday ? (
+                          "欠席"
+                        ) : isFullCount ? (
+                          "レッスン回数が上限に達しています"
+                        ) : (
+                          <>
+                            <MainBtn
+                              label="出席"
+                              onClick={() => {
+                                updateAttendance(
+                                  student.docId,
+                                  student.docData.attendedDate,
+                                  student.docData.schedule
+                                );
+                              }}
+                            />
+                            <MainBtn
+                              label="欠席"
+                              sx={{ ml: 2 }}
+                              onClick={() => {
+                                updateAbsence(
+                                  student.docId,
+                                  student.docData.absentDate,
+                                  student.docData.schedule
+                                );
+                              }}
+                            />
+                          </>
+                        )}
+                      </CustomTableCell>
+                      <CustomTableCell>
+                        {student.docData.attendedDate.length +
+                          student.docData.absentDate.length +
+                          " / " +
+                          student.docData.maxCount}
+                      </CustomTableCell>
+                      <CustomTableCell>
+                        {isFullCount ? (
                           <MainBtn
-                            label="出席"
+                            label="リセット"
                             onClick={() => {
-                              updateAttendance(
-                                student.docId,
-                                student.docData.attendedDate,
-                                student.docData.schedule
-                              );
+                              resetCount(student.docId);
                             }}
                           />
-                          <MainBtn
-                            label="欠席"
-                            sx={{ ml: 2 }}
-                            onClick={() => {
-                              updateAbsence(
-                                student.docId,
-                                student.docData.absentDate,
-                                student.docData.schedule
-                              );
-                            }}
-                          />
-                        </>
-                      )}
-                    </CustomTableCell>
-                    <CustomTableCell>
-                      {student.docData.attendedDate.length +
-                        student.docData.absentDate.length +
-                        " / " +
-                        student.docData.maxCount}
-                    </CustomTableCell>
-                  </TableRow>
-                ))}
+                        ) : (
+                          "-"
+                        )}
+                      </CustomTableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>
@@ -256,52 +301,92 @@ export default function Home() {
                   <CustomTableCell>対象日時</CustomTableCell>
                   <CustomTableCell>名前</CustomTableCell>
                   <CustomTableCell>出席登録</CustomTableCell>
+                  <CustomTableCell>登録レッスン回数</CustomTableCell>
+                  <CustomTableCell>カウントリセット</CustomTableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {forgottenStudents.map((forgottenStudent, index) => (
-                  <TableRow key={index}>
-                    <CustomTableCell>
-                      {forgottenStudent.docData.date}
-                    </CustomTableCell>
-                    <CustomTableCell>
-                      <Link
-                        href={"/student/" + forgottenStudent.docId}
-                        sx={{
-                          color: theme.palette.primary.main,
-                          fontWeight: "bold",
-                        }}
-                      >
-                        {forgottenStudent.docData.lastName +
-                          " " +
-                          forgottenStudent.docData.firstName}
-                      </Link>
-                    </CustomTableCell>
-                    <CustomTableCell>
-                      <MainBtn
-                        label="出席"
-                        onClick={() => {
-                          updateAttendance(
-                            forgottenStudent.docId,
-                            forgottenStudent.docData.attendedDate,
-                            forgottenStudent.docData.schedule
-                          );
-                        }}
-                      />
-                      <MainBtn
-                        label="欠席"
-                        sx={{ ml: 2 }}
-                        onClick={() => {
-                          updateAbsence(
-                            forgottenStudent.docId,
-                            forgottenStudent.docData.absentDate,
-                            forgottenStudent.docData.schedule
-                          );
-                        }}
-                      />
-                    </CustomTableCell>
-                  </TableRow>
-                ))}
+                {forgottenStudents.map((forgottenStudent, index) => {
+                  const isFullCount =
+                    forgottenStudent.docData.attendedDate.length +
+                      forgottenStudent.docData.absentDate.length >=
+                    Number(forgottenStudent.docData.maxCount);
+
+                  return (
+                    <TableRow
+                      key={index}
+                      sx={{
+                        backgroundColor: isFullCount
+                          ? theme.palette.tertiary.light
+                          : undefined,
+                      }}
+                    >
+                      <CustomTableCell>
+                        {forgottenStudent.docData.date}
+                      </CustomTableCell>
+                      <CustomTableCell>
+                        <Link
+                          href={"/student/" + forgottenStudent.docId}
+                          sx={{
+                            color: theme.palette.primary.main,
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {forgottenStudent.docData.lastName +
+                            " " +
+                            forgottenStudent.docData.firstName}
+                        </Link>
+                      </CustomTableCell>
+                      <CustomTableCell>
+                        {!isFullCount ? (
+                          <>
+                            <MainBtn
+                              label="出席"
+                              onClick={() => {
+                                updateAttendance(
+                                  forgottenStudent.docId,
+                                  forgottenStudent.docData.attendedDate,
+                                  forgottenStudent.docData.schedule
+                                );
+                              }}
+                            />
+                            <MainBtn
+                              label="欠席"
+                              sx={{ ml: 2 }}
+                              onClick={() => {
+                                updateAbsence(
+                                  forgottenStudent.docId,
+                                  forgottenStudent.docData.absentDate,
+                                  forgottenStudent.docData.schedule
+                                );
+                              }}
+                            />
+                          </>
+                        ) : (
+                          "レッスン回数が上限に達しています"
+                        )}
+                      </CustomTableCell>
+                      <CustomTableCell>
+                        {forgottenStudent.docData.attendedDate.length +
+                          forgottenStudent.docData.absentDate.length +
+                          " / " +
+                          forgottenStudent.docData.maxCount}
+                      </CustomTableCell>
+                      <CustomTableCell>
+                        {isFullCount ? (
+                          <MainBtn
+                            label="リセット"
+                            onClick={() => {
+                              resetCount(forgottenStudent.docId);
+                            }}
+                          />
+                        ) : (
+                          "-"
+                        )}
+                      </CustomTableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>

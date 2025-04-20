@@ -17,7 +17,6 @@ export function MainBtn({ label, sx, onClick }: MainBtnProps) {
     fontFamily: theme.typography.fontFamily,
     fontSize: "1rem",
     textTransform: "none",
-    boxShadow: "0px 4px 12px",
     transition: "all 0.3s ease",
     "&:hover": {
       backgroundColor: theme.palette.primary.dark,

@@ -113,7 +113,7 @@ export default function StudentId() {
       lastAttendedDate?.isSame(day, "day") ||
       lastAbsentDate?.isSame(day, "day")
     ) {
-      return; // 昨日以前は選択できない。また、本日出血登録が完了しているなら、本日も選択できない。
+      return; // 昨日以前は選択できない。また、本日出欠登録が完了しているなら、本日も選択できない。
     }
     setStudent((prevState) => {
       const exists = prevState.schedule.some((date: dayjs.Dayjs) =>
@@ -160,7 +160,7 @@ export default function StudentId() {
         selected={selectedDate?.isSame(day, "day")}
         sx={{
           fontFamily: theme.typography.fontFamily,
-          fontWeight: 700,
+          fontWeight: "700 !important",
           backgroundColor: isAttended
             ? `${theme.palette.secondary.main} !important`
             : (selectedDate?.isSame(day, "day") && isScheduled) || isScheduled
@@ -408,7 +408,7 @@ export default function StudentId() {
             fontFamily: theme.typography.fontFamily,
           }}
         >
-          今年度分スケジュール
+          今回分スケジュール
         </Typography>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateCalendar
