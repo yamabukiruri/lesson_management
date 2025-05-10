@@ -145,9 +145,9 @@ export default function MenuBar() {
     setOpen(false);
   };
 
-  if (!user) {
-    return <Box />;
-  }
+  // if (!user) {
+  //   return <Box />;
+  // }
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -169,7 +169,7 @@ export default function MenuBar() {
             <IconButton
               color="inherit"
               aria-label="open drawer"
-              onClick={handleDrawerOpen}
+              onClick={user ? handleDrawerOpen : () => {}}
               edge="start"
               sx={[
                 {
@@ -197,7 +197,11 @@ export default function MenuBar() {
             }}
           >
             <Button
-              sx={{ color: "inherit", gap: 1 }}
+              sx={{
+                color: "inherit",
+                gap: 1,
+                display: user ? "flex" : "none",
+              }}
               onClick={() => {
                 if (confirm("ログアウトしますか？")) {
                   auth.signOut();
@@ -219,7 +223,11 @@ export default function MenuBar() {
           </Box>
         </Toolbar>
       </AppBar>
-      <Drawer variant="permanent" open={open}>
+      <Drawer
+        variant="permanent"
+        open={open}
+        sx={{ display: user ? "block" : "none" }}
+      >
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === "rtl" ? (

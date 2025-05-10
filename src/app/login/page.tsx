@@ -24,7 +24,7 @@ export default function Login() {
           elevation={6}
           sx={{
             padding: { xs: 4, sm: 6 },
-            width: { xs: "90%", sm: "400px" },
+            width: { xs: "90%", sm: "440px" },
             borderRadius: 4,
             backgroundColor: "white",
             display: "flex",
@@ -42,9 +42,11 @@ export default function Login() {
               fontFamily: theme.typography.fontFamily,
             }}
           >
-            Welcome to Lesson Manager!
+            Lesson Manager
           </Typography>
-
+          <Typography sx={{ fontFamily: theme.typography.fontFamily, mb: 5 }}>
+            ピアノ教室の先生のための生徒管理アプリ
+          </Typography>
           <MainBtn label="サインイン" onClick={signInWithGoogle} />
         </Paper>
       )}
