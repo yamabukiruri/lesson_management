@@ -9,9 +9,11 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TableSortLabel,
+  Typography,
 } from "@mui/material";
 import { db } from "../../firebase";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { CardTitle } from "@/components/title";
 import { MainBtn } from "@/components/button";
@@ -20,6 +22,10 @@ import { theme } from "@/library/theme";
 import { useAuth } from "../context/authContext";
 import Loading from "@/components/loading";
 import CustomTableCell from "@/components/tableCell";
+import { CustomTextField } from "@/components/input";
+
+type SortKey = "name" | "age" | "count";
+type SortOrder = "asc" | "desc";
 
 export interface Student {
   absentDate: string[];
@@ -28,9 +34,11 @@ export interface Student {
   building: string;
   city: string;
   firstName: string;
+  firstNameKana: string;
   gender: number;
   hour: string;
   lastName: string;
+  lastNameKana: string;
   maxCount: string;
   minute: string;
   pref: string;
@@ -47,6 +55,56 @@ export default function Student() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [students, setStudents] = useState<Doc[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortOrder(sortOrder === "desc" ? "asc" : "desc");
+    } else {
+      setSortKey(key);
+      setSortOrder("desc");
+    }
+  };
+
+  const displayStudents = useMemo(() => {
+    const query = searchQuery.trim();
+    const filtered = query
+      ? students.filter((s) =>
+          `${s.lastName}${s.firstName} ${s.lastName} ${s.firstName}`.includes(
+            query
+          )
+        )
+      : students;
+
+    const sorted = [...filtered].sort((a, b) => {
+      let cmp = 0;
+      switch (sortKey) {
+        case "age":
+          cmp = Number(a.age) - Number(b.age);
+          break;
+        case "count":
+          cmp =
+            a.attendedDate.length +
+            a.absentDate.length -
+            (b.attendedDate.length + b.absentDate.length);
+          break;
+        default: {
+          const keyA =
+            `${a.lastNameKana}${a.firstNameKana}` ||
+            `${a.lastName}${a.firstName}`;
+          const keyB =
+            `${b.lastNameKana}${b.firstNameKana}` ||
+            `${b.lastName}${b.firstName}`;
+          cmp = keyA.localeCompare(keyB, "ja");
+        }
+      }
+      return sortOrder === "asc" ? cmp : -cmp;
+    });
+
+    return sorted;
+  }, [students, searchQuery, sortKey, sortOrder]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -72,9 +130,11 @@ export default function Student() {
               building: data.building || "",
               city: data.city || "",
               firstName: data.firstName || "",
+              firstNameKana: data.firstNameKana || "",
               gender: data.gender || 0,
               hour: data.hour || "",
               lastName: data.lastName || "",
+              lastNameKana: data.lastNameKana || "",
               maxCount: data.maxCount || "",
               minute: data.minute || "",
               pref: data.pref || "",
@@ -108,18 +168,62 @@ export default function Student() {
     <Box sx={{ width: "100%" }}>
       <Panel sx={{ display: "grid" }}>
         <CardTitle label="生徒一覧" />
+        <Box sx={{ mb: 2 }}>
+          <CustomTextField
+            label="名前で検索"
+            name="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </Box>
         <TableContainer sx={{ width: "100%" }}>
           <Table>
             <TableHead>
               <TableRow>
-                <CustomTableCell>名前</CustomTableCell>
-                <CustomTableCell>年齢</CustomTableCell>
-                <CustomTableCell>登録レッスン回数</CustomTableCell>
+                <CustomTableCell>
+                  <TableSortLabel
+                    active={sortKey === "name"}
+                    direction={sortKey === "name" ? sortOrder : "desc"}
+                    onClick={() => handleSort("name")}
+                    sx={{
+                      fontFamily: theme.typography.fontFamily,
+                      fontWeight: 600,
+                    }}
+                  >
+                    名前
+                  </TableSortLabel>
+                </CustomTableCell>
+                <CustomTableCell>
+                  <TableSortLabel
+                    active={sortKey === "age"}
+                    direction={sortKey === "age" ? sortOrder : "desc"}
+                    onClick={() => handleSort("age")}
+                    sx={{
+                      fontFamily: theme.typography.fontFamily,
+                      fontWeight: 600,
+                    }}
+                  >
+                    年齢
+                  </TableSortLabel>
+                </CustomTableCell>
+                <CustomTableCell>
+                  <TableSortLabel
+                    active={sortKey === "count"}
+                    direction={sortKey === "count" ? sortOrder : "desc"}
+                    onClick={() => handleSort("count")}
+                    sx={{
+                      fontFamily: theme.typography.fontFamily,
+                      fontWeight: 600,
+                    }}
+                  >
+                    登録レッスン回数
+                  </TableSortLabel>
+                </CustomTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {students.map((student, index) => (
-                <TableRow key={index}>
+              {displayStudents.map((student) => (
+                <TableRow key={student.docId}>
                   <CustomTableCell>
                     <Link
                       href={"/student/" + student.docId}
@@ -143,6 +247,20 @@ export default function Student() {
             </TableBody>
           </Table>
         </TableContainer>
+        {displayStudents.length === 0 && (
+          <Typography
+            sx={{
+              textAlign: "center",
+              color: "#888",
+              py: 3,
+              fontFamily: theme.typography.fontFamily,
+            }}
+          >
+            {students.length === 0
+              ? "生徒が登録されていません"
+              : "該当する生徒がいません"}
+          </Typography>
+        )}
       </Panel>
       <Box sx={{ display: "flex", alignItems: "", justifyContent: "center" }}>
         <MainBtn

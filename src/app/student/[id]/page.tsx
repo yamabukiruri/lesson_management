@@ -39,6 +39,8 @@ export default function StudentId() {
   const [student, setStudent] = useState<DocumentData>({
     lastName: "",
     firstName: "",
+    lastNameKana: "",
+    firstNameKana: "",
     age: "",
     startDate: defaultDate,
     maxCount: 0,
@@ -265,6 +267,18 @@ export default function StudentId() {
             label="名"
             name="firstName"
             value={student.firstName}
+            onChange={handleTextField}
+          />
+          <CustomTextField
+            label="ふりがな(姓)"
+            name="lastNameKana"
+            value={student.lastNameKana ?? ""}
+            onChange={handleTextField}
+          />
+          <CustomTextField
+            label="ふりがな(名)"
+            name="firstNameKana"
+            value={student.firstNameKana ?? ""}
             onChange={handleTextField}
           />
           <CustomTextField
