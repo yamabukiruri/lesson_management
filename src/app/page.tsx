@@ -198,6 +198,53 @@ export default function Home() {
     [user]
   );
 
+  // 出欠登録の取り消し(直近の登録を schedule に戻す)
+  const undoAttendance = useCallback(
+    async (id: string, attendedDate: string[], schedule: string[]) => {
+      if (!user || attendedDate.length === 0) return;
+
+      const confirmed = window.confirm(
+        "出席登録を取り消します。よろしいですか？"
+      );
+      if (!confirmed) return;
+
+      const restored = attendedDate[attendedDate.length - 1];
+      const newSchedule = [...schedule, restored].sort(
+        (a, b) => new Date(a).getTime() - new Date(b).getTime()
+      );
+
+      const docRef = doc(db, "users", user.uid, "students", id);
+      await updateDoc(docRef, {
+        attendedDate: attendedDate.slice(0, -1),
+        schedule: newSchedule,
+      });
+    },
+    [user]
+  );
+
+  const undoAbsence = useCallback(
+    async (id: string, absentDate: string[], schedule: string[]) => {
+      if (!user || absentDate.length === 0) return;
+
+      const confirmed = window.confirm(
+        "欠席登録を取り消します。よろしいですか？"
+      );
+      if (!confirmed) return;
+
+      const restored = absentDate[absentDate.length - 1];
+      const newSchedule = [...schedule, restored].sort(
+        (a, b) => new Date(a).getTime() - new Date(b).getTime()
+      );
+
+      const docRef = doc(db, "users", user.uid, "students", id);
+      await updateDoc(docRef, {
+        absentDate: absentDate.slice(0, -1),
+        schedule: newSchedule,
+      });
+    },
+    [user]
+  );
+
   // カウントリセット
   const resetCount = useCallback(
     async (id: string) => {
@@ -258,8 +305,78 @@ export default function Home() {
       };
 
       const renderAttendanceStatus = () => {
-        if (student.docData.isAttendedToday) return "出席";
-        if (student.docData.isAbsentToday) return "欠席";
+        if (student.docData.isAttendedToday) {
+          return (
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Typography
+                sx={{ fontWeight: 700, color: theme.palette.primary.dark }}
+              >
+                出席
+              </Typography>
+              <MainBtn
+                label="取り消し"
+                sx={{
+                  backgroundColor: "transparent",
+                  color: theme.palette.primary.main,
+                  border: `1px solid ${theme.palette.primary.main}`,
+                  padding: "6px 12px",
+                  fontSize: "0.85rem",
+                  "&:hover": {
+                    backgroundColor: theme.palette.secondary.light,
+                  },
+                }}
+                onClick={() =>
+                  undoAttendance(
+                    student.docId,
+                    student.docData.attendedDate,
+                    student.docData.schedule
+                  )
+                }
+              />
+            </Stack>
+          );
+        }
+        if (student.docData.isAbsentToday) {
+          return (
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={1}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Typography
+                sx={{ fontWeight: 700, color: theme.palette.primary.dark }}
+              >
+                欠席
+              </Typography>
+              <MainBtn
+                label="取り消し"
+                sx={{
+                  backgroundColor: "transparent",
+                  color: theme.palette.primary.main,
+                  border: `1px solid ${theme.palette.primary.main}`,
+                  padding: "6px 12px",
+                  fontSize: "0.85rem",
+                  "&:hover": {
+                    backgroundColor: theme.palette.secondary.light,
+                  },
+                }}
+                onClick={() =>
+                  undoAbsence(
+                    student.docId,
+                    student.docData.absentDate,
+                    student.docData.schedule
+                  )
+                }
+              />
+            </Stack>
+          );
+        }
         if (isFullCount) return "レッスン回数が上限に達しています";
 
         return (
@@ -334,7 +451,7 @@ export default function Home() {
         </TableRow>
       );
     },
-    [updateAttendance, updateAbsence, resetCount]
+    [updateAttendance, updateAbsence, undoAttendance, undoAbsence, resetCount]
   );
 
   // 共通テーブルコンポーネント
