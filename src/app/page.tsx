@@ -466,7 +466,7 @@ export default function Home() {
       timeColumnLabel?: string;
     }) => (
       <TableContainer sx={{ width: "100%", overflowX: "auto" }}>
-        <Table>
+        <Table sx={{ minWidth: 600 }}>
           <TableHead>
             <TableRow>
               <CustomTableCell>{timeColumnLabel}</CustomTableCell>
