@@ -17,6 +17,9 @@ interface CustomTextFieldProps {
   value: string | number;
   type?: "date" | "number";
   sx?: SxProps;
+  error?: boolean;
+  helperText?: string;
+  required?: boolean;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -26,6 +29,9 @@ export function CustomTextField({
   value,
   type,
   sx,
+  error,
+  helperText,
+  required,
   onChange,
 }: CustomTextFieldProps) {
   const defaultSx = {
@@ -53,13 +59,29 @@ export function CustomTextField({
     },
   };
 
+  const renderedLabel = required ? (
+    <>
+      {label}
+      <Box
+        component="span"
+        sx={{ color: theme.palette.error.main, ml: 0.5 }}
+      >
+        （必須）
+      </Box>
+    </>
+  ) : (
+    label
+  );
+
   return (
     <TextField
-      label={label}
+      label={renderedLabel}
       variant="filled"
       name={name}
       value={value}
       type={type}
+      error={error}
+      helperText={helperText}
       sx={{ ...defaultSx, ...sx }}
       onChange={onChange}
       fullWidth

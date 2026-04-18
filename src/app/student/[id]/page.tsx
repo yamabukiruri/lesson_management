@@ -58,6 +58,7 @@ export default function StudentId() {
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null); //カレンダーで選択した値
   const [attendedDateList, setAttendedDateList] = useState<Dayjs[]>([]); //今までの出席日
   const [absentDateList, setAbsentDateList] = useState<Dayjs[]>([]); //今までの欠席日
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!loading && !user) {
@@ -98,6 +99,76 @@ export default function StudentId() {
       ...prevState,
       [name]: value,
     }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
+  };
+
+  // ひらがな(長音符を含む)のみ許可
+  const KANA_REGEX = /^[\u3040-\u309Fー]+$/;
+
+  const validate = (): Record<string, string> => {
+    const e: Record<string, string> = {};
+
+    if (!String(student.lastName).trim()) e.lastName = "姓を入力してください";
+    if (!String(student.firstName).trim()) e.firstName = "名を入力してください";
+
+    if (!String(student.lastNameKana ?? "").trim()) {
+      e.lastNameKana = "ふりがな(姓)を入力してください";
+    } else if (!KANA_REGEX.test(student.lastNameKana)) {
+      e.lastNameKana = "ひらがなで入力してください";
+    }
+    if (!String(student.firstNameKana ?? "").trim()) {
+      e.firstNameKana = "ふりがな(名)を入力してください";
+    } else if (!KANA_REGEX.test(student.firstNameKana)) {
+      e.firstNameKana = "ひらがなで入力してください";
+    }
+
+    const ageNum = Number(student.age);
+    if (student.age === "" || student.age === null || student.age === undefined) {
+      e.age = "年齢を入力してください";
+    } else if (!Number.isInteger(ageNum) || ageNum < 0 || ageNum > 120) {
+      e.age = "0〜120の整数で入力してください";
+    }
+
+    const maxCountNum = Number(student.maxCount);
+    if (
+      student.maxCount === "" ||
+      student.maxCount === null ||
+      student.maxCount === undefined
+    ) {
+      e.maxCount = "レッスン回数上限を入力してください";
+    } else if (!Number.isInteger(maxCountNum) || maxCountNum < 1) {
+      e.maxCount = "1以上の整数で入力してください";
+    }
+
+    const hourNum = Number(student.hour);
+    if (student.hour === "" || student.hour === null || student.hour === undefined) {
+      e.hour = "時を入力してください";
+    } else if (!Number.isInteger(hourNum) || hourNum < 0 || hourNum > 23) {
+      e.hour = "0〜23で入力してください";
+    }
+
+    const minuteNum = Number(student.minute);
+    if (
+      student.minute === "" ||
+      student.minute === null ||
+      student.minute === undefined
+    ) {
+      e.minute = "分を入力してください";
+    } else if (!Number.isInteger(minuteNum) || minuteNum < 0 || minuteNum > 59) {
+      e.minute = "0〜59で入力してください";
+    }
+
+    if (!student.startDate || !dayjs(student.startDate).isValid()) {
+      e.startDate = "レッスン開始日を入力してください";
+    }
+
+    return e;
   };
 
   const handleCalendar = (day: Dayjs) => {
@@ -181,6 +252,13 @@ export default function StudentId() {
 
   const registData = async () => {
     if (!user) return;
+
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     //新規作成
     if (id === "0") {
       const docRef = collection(db, "users", user.uid, "students");
@@ -261,24 +339,36 @@ export default function StudentId() {
             label="姓"
             name="lastName"
             value={student.lastName}
+            required
+            error={!!errors.lastName}
+            helperText={errors.lastName}
             onChange={handleTextField}
           />
           <CustomTextField
             label="名"
             name="firstName"
             value={student.firstName}
+            required
+            error={!!errors.firstName}
+            helperText={errors.firstName}
             onChange={handleTextField}
           />
           <CustomTextField
             label="ふりがな(姓)"
             name="lastNameKana"
             value={student.lastNameKana ?? ""}
+            required
+            error={!!errors.lastNameKana}
+            helperText={errors.lastNameKana}
             onChange={handleTextField}
           />
           <CustomTextField
             label="ふりがな(名)"
             name="firstNameKana"
             value={student.firstNameKana ?? ""}
+            required
+            error={!!errors.firstNameKana}
+            helperText={errors.firstNameKana}
             onChange={handleTextField}
           />
           <CustomTextField
@@ -286,6 +376,9 @@ export default function StudentId() {
             name="age"
             value={student.age}
             type="number"
+            required
+            error={!!errors.age}
+            helperText={errors.age}
             onChange={handleTextField}
           />
           <CustomPulldown
@@ -380,6 +473,9 @@ export default function StudentId() {
             name="startDate"
             value={student.startDate}
             type="date"
+            required
+            error={!!errors.startDate}
+            helperText={errors.startDate}
             onChange={handleTextField}
           />
           <CustomTextField
@@ -387,6 +483,9 @@ export default function StudentId() {
             name="maxCount"
             value={student.maxCount}
             type="number"
+            required
+            error={!!errors.maxCount}
+            helperText={errors.maxCount}
             onChange={handleTextField}
           />
           <Box
@@ -397,18 +496,24 @@ export default function StudentId() {
             }}
           >
             <CustomTextField
-              label="レッスン時間（時）"
+              label="レッスン時間(時)"
               name="hour"
               value={student.hour}
               type="number"
+              required
+              error={!!errors.hour}
+              helperText={errors.hour}
               onChange={handleTextField}
             />
             <Typography>：</Typography>
             <CustomTextField
-              label="レッスン時間（分）"
+              label="レッスン時間(分)"
               name="minute"
               value={student.minute}
               type="number"
+              required
+              error={!!errors.minute}
+              helperText={errors.minute}
               onChange={handleTextField}
             />
             <Typography>〜</Typography>
