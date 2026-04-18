@@ -13,8 +13,15 @@ import {
   Typography,
 } from "@mui/material";
 import { db } from "../firebase";
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
+import { useEffect, useState, useCallback } from "react";
+import {
+  collection,
+  onSnapshot,
+  doc,
+  updateDoc,
+  QueryDocumentSnapshot,
+  DocumentData,
+} from "firebase/firestore";
 import { CardTitle } from "@/components/title";
 import { MainBtn } from "@/components/button";
 import { theme } from "@/library/theme";
@@ -80,7 +87,7 @@ export default function Home() {
 
   // 学生データを処理する関数
   const processStudentData = useCallback(
-    (rawDoc: any) => {
+    (rawDoc: QueryDocumentSnapshot<DocumentData>) => {
       const { startOfToday, endOfToday } = createDateBoundaries();
       const data = rawDoc.data() as Student;
       const schedule = data?.schedule || [];
@@ -274,17 +281,10 @@ export default function Home() {
       student: Doc;
       showFullDateTime?: boolean;
     }) => {
-      const isFullCount = useMemo(
-        () =>
-          student.docData.attendedDate.length +
-            student.docData.absentDate.length >=
-          Number(student.docData.maxCount),
-        [
-          student.docData.attendedDate.length,
-          student.docData.absentDate.length,
-          student.docData.maxCount,
-        ]
-      );
+      const isFullCount =
+        student.docData.attendedDate.length +
+          student.docData.absentDate.length >=
+        Number(student.docData.maxCount);
 
       const formatTime = (dateStr: string) => {
         const date = new Date(dateStr);
