@@ -25,7 +25,7 @@ import { useRouter } from "next/navigation";
 import { theme } from "@/library/theme";
 import { useAuth } from "@/app/context/authContext";
 import { useEffect } from "react";
-import { Button } from "@mui/material";
+import { Button, useMediaQuery } from "@mui/material";
 import { auth } from "@/firebase";
 
 const drawerWidth = 240;
@@ -128,6 +128,7 @@ const menuList = [
 export default function MenuBar() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   useEffect(() => {
     if (!loading && !user) {
@@ -145,6 +146,57 @@ export default function MenuBar() {
     setOpen(false);
   };
 
+  const handleNavigate = (link: string) => {
+    router.push(link);
+    if (isMobile) setOpen(false);
+  };
+
+  const drawerContent = (
+    <>
+      <DrawerHeader>
+        <IconButton onClick={handleDrawerClose}>
+          {theme.direction === "rtl" ? (
+            <ChevronRightIcon />
+          ) : (
+            <ChevronLeftIcon />
+          )}
+        </IconButton>
+      </DrawerHeader>
+      <Divider />
+      <List>
+        {menuList.map((menu) => (
+          <ListItem key={menu.text} disablePadding sx={{ display: "block" }}>
+            <ListItemButton
+              sx={[
+                { minHeight: 48, px: 2.5 },
+                isMobile || open
+                  ? { justifyContent: "initial" }
+                  : { justifyContent: "center" },
+              ]}
+              onClick={() => handleNavigate(menu.link)}
+            >
+              <ListItemIcon
+                sx={[
+                  { minWidth: 0, justifyContent: "center" },
+                  isMobile || open ? { mr: 3 } : { mr: "auto" },
+                ]}
+              >
+                {menu.icon}
+              </ListItemIcon>
+              <ListItemText
+                primary={menu.text}
+                sx={[
+                  { fontFamily: `${theme.typography.fontFamily} !important` },
+                  isMobile || open ? { opacity: 1 } : { opacity: 0 },
+                ]}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </>
+  );
+
   // if (!user) {
   //   return <Box />;
   // }
@@ -154,7 +206,7 @@ export default function MenuBar() {
       <CssBaseline />
       <AppBar
         position="fixed"
-        open={open}
+        open={!isMobile && open}
         sx={{
           backgroundColor: theme.palette.primary.main,
         }}
@@ -223,79 +275,28 @@ export default function MenuBar() {
           </Box>
         </Toolbar>
       </AppBar>
-      <Drawer
-        variant="permanent"
-        open={open}
-        sx={{ display: user ? "block" : "none" }}
-      >
-        <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "rtl" ? (
-              <ChevronRightIcon />
-            ) : (
-              <ChevronLeftIcon />
-            )}
-          </IconButton>
-        </DrawerHeader>
-        <Divider />
-        <List>
-          {menuList.map((menu) => (
-            <ListItem key={menu.text} disablePadding sx={{ display: "block" }}>
-              <ListItemButton
-                sx={[
-                  {
-                    minHeight: 48,
-                    px: 2.5,
-                  },
-                  open
-                    ? {
-                        justifyContent: "initial",
-                      }
-                    : {
-                        justifyContent: "center",
-                      },
-                ]}
-                onClick={() => {
-                  router.push(menu.link);
-                }}
-              >
-                <ListItemIcon
-                  sx={[
-                    {
-                      minWidth: 0,
-                      justifyContent: "center",
-                    },
-                    open
-                      ? {
-                          mr: 3,
-                        }
-                      : {
-                          mr: "auto",
-                        },
-                  ]}
-                >
-                  {menu.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={menu.text}
-                  sx={[
-                    {
-                      fontFamily: `${theme.typography.fontFamily} !important`,
-                    },
-                    open
-                      ? {
-                          opacity: 1,
-                        }
-                      : {
-                          opacity: 0,
-                        },
-                  ]}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Drawer>
+      {isMobile ? (
+        <MuiDrawer
+          variant="temporary"
+          open={open}
+          onClose={handleDrawerClose}
+          ModalProps={{ keepMounted: true }}
+          sx={{
+            display: user ? "block" : "none",
+            "& .MuiDrawer-paper": { width: drawerWidth },
+          }}
+        >
+          {drawerContent}
+        </MuiDrawer>
+      ) : (
+        <Drawer
+          variant="permanent"
+          open={open}
+          sx={{ display: user ? "block" : "none" }}
+        >
+          {drawerContent}
+        </Drawer>
+      )}
     </Box>
   );
 }

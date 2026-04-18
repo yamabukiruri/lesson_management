@@ -329,7 +329,7 @@ export default function StudentId() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
             rowGap: 2,
             columnGap: 3,
             marginBottom: 3,
@@ -411,7 +411,7 @@ export default function StudentId() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
             rowGap: 2,
             columnGap: 3,
             marginBottom: 3,
@@ -429,7 +429,7 @@ export default function StudentId() {
               }));
             }}
           />
-          <Box />
+          <Box sx={{ display: { xs: "none", sm: "block" } }} />
           <CustomTextField
             label="市区町村"
             name="city"
@@ -462,7 +462,7 @@ export default function StudentId() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
             rowGap: 2,
             columnGap: 3,
             marginBottom: 3,
