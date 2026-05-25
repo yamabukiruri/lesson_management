@@ -25,6 +25,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { MainBtn } from "@/components/button";
 import { theme } from "@/library/theme";
 import { CustomPulldown, CustomTextField } from "@/components/input";
+import { Notice } from "@/components/notice";
 import { prefList } from "@/library/fixedData";
 import { useAuth } from "@/app/context/authContext";
 import Loading from "@/components/loading";
@@ -59,6 +60,7 @@ export default function StudentId() {
   const [attendedDateList, setAttendedDateList] = useState<Dayjs[]>([]); //今までの出席日
   const [absentDateList, setAbsentDateList] = useState<Dayjs[]>([]); //今までの欠席日
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -306,7 +308,8 @@ export default function StudentId() {
           ), //形を整えた後、古い順にソート
       });
     }
-    router.back();
+    setSnackbarOpen(true);
+    setTimeout(() => router.back(), 1500);
   };
 
   if (loading) {
@@ -543,6 +546,11 @@ export default function StudentId() {
       >
         <MainBtn label="保存" sx={{ width: 160 }} onClick={registData} />
       </Box>
+      <Notice
+        open={snackbarOpen}
+        message="保存しました"
+        onClose={() => setSnackbarOpen(false)}
+      />
     </Box>
   );
 }
