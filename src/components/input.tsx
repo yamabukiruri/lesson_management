@@ -95,6 +95,7 @@ interface CustomPulldownProps {
   value: number;
   sx?: SxProps;
   options: { id: number; name: string }[];
+  disabled?: boolean;
   onChange: (value: number) => void;
 }
 
@@ -104,6 +105,7 @@ export function CustomPulldown({
   value,
   sx,
   options,
+  disabled,
   onChange,
 }: CustomPulldownProps) {
   const defaultSx = {
@@ -137,7 +139,12 @@ export function CustomPulldown({
 
   return (
     <Box sx={{ minWidth: 120 }}>
-      <FormControl variant="filled" fullWidth sx={{ ...defaultSx, ...sx }}>
+      <FormControl
+        variant="filled"
+        fullWidth
+        disabled={disabled}
+        sx={{ ...defaultSx, ...sx }}
+      >
         <InputLabel sx={{ fontFamily: theme.typography.fontFamily }}>
           {label}
         </InputLabel>

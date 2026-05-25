@@ -4,10 +4,11 @@ import { Button, SxProps, Theme } from "@mui/material";
 interface BtnProps {
   label: string;
   sx?: SxProps<Theme>;
+  disabled?: boolean;
   onClick: () => void;
 }
 
-export function MainBtn({ label, sx, onClick }: BtnProps) {
+export function MainBtn({ label, sx, disabled, onClick }: BtnProps) {
   const defaultSx: SxProps<Theme> = {
     backgroundColor: theme.palette.primary.main,
     color: "#fff",
@@ -27,6 +28,7 @@ export function MainBtn({ label, sx, onClick }: BtnProps) {
     <Button
       variant="contained"
       onClick={onClick}
+      disabled={disabled}
       sx={{ ...(defaultSx as object), ...(sx as object) }}
     >
       {label}
@@ -34,7 +36,7 @@ export function MainBtn({ label, sx, onClick }: BtnProps) {
   );
 }
 
-export function SubBtn({ label, sx, onClick }: BtnProps) {
+export function SubBtn({ label, sx, disabled, onClick }: BtnProps) {
   const defaultSx: SxProps<Theme> = {
     backgroundColor: "transparent",
     color: theme.palette.primary.main,
@@ -56,6 +58,7 @@ export function SubBtn({ label, sx, onClick }: BtnProps) {
     <Button
       variant="outlined"
       onClick={onClick}
+      disabled={disabled}
       sx={{ ...(defaultSx as object), ...(sx as object) }}
     >
       {label}
