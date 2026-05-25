@@ -20,6 +20,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import PianoRoundedIcon from "@mui/icons-material/PianoRounded";
 import SentimentSatisfiedAltRoundedIcon from "@mui/icons-material/SentimentSatisfiedAltRounded";
+import StorefrontRoundedIcon from "@mui/icons-material/StorefrontRounded";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useRouter } from "next/navigation";
 import { theme } from "@/library/theme";
@@ -122,6 +123,11 @@ const menuList = [
     text: "生徒情報",
     icon: <SentimentSatisfiedAltRoundedIcon />,
     link: "/student",
+  },
+  {
+    text: "教室設定",
+    icon: <StorefrontRoundedIcon />,
+    link: "/settings",
   },
 ];
 
