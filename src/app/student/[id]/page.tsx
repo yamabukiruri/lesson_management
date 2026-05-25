@@ -13,7 +13,7 @@ import {
   collection,
   addDoc,
 } from "firebase/firestore";
-import { CardTitle } from "@/components/title";
+import { CardTitle, SectionTitle } from "@/components/title";
 import { useParams, useRouter } from "next/navigation";
 import dayjs, { Dayjs } from "dayjs";
 import {
@@ -324,11 +324,7 @@ export default function StudentId() {
     <Box sx={{ width: "100%" }}>
       <Panel>
         <CardTitle label="生徒情報" />
-        <Typography
-          sx={{ marginBottom: 1, fontFamily: theme.typography.fontFamily }}
-        >
-          基本情報
-        </Typography>
+        <SectionTitle label="基本情報" />
         <Box
           sx={{
             display: "grid",
@@ -402,15 +398,7 @@ export default function StudentId() {
           />
         </Box>
         <Divider />
-        <Typography
-          sx={{
-            marginTop: 2,
-            marginBottom: 1,
-            fontFamily: theme.typography.fontFamily,
-          }}
-        >
-          住所
-        </Typography>
+        <SectionTitle label="住所" sx={{ marginTop: 2 }} />
         <Box
           sx={{
             display: "grid",
@@ -453,15 +441,7 @@ export default function StudentId() {
           />
         </Box>
         <Divider />
-        <Typography
-          sx={{
-            marginTop: 2,
-            marginBottom: 1,
-            fontFamily: theme.typography.fontFamily,
-          }}
-        >
-          レッスン情報
-        </Typography>
+        <SectionTitle label="レッスン情報" sx={{ marginTop: 2 }} />
         <Box
           sx={{
             display: "grid",
@@ -523,15 +503,7 @@ export default function StudentId() {
           </Box>
         </Box>
         <Divider />
-        <Typography
-          sx={{
-            marginTop: 2,
-            marginBottom: 1,
-            fontFamily: theme.typography.fontFamily,
-          }}
-        >
-          今回分スケジュール
-        </Typography>
+        <SectionTitle label="今回分スケジュール" sx={{ marginTop: 2 }} />
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateCalendar
             value={selectedDate}
