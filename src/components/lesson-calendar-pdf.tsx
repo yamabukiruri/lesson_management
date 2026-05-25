@@ -27,9 +27,9 @@ Font.register({
 
 // 月ごとのテーマカラー
 const MONTH_COLORS: Record<number, string> = {
-  1: "#5a9bd4",
-  2: "#7b6ba8",
-  3: "#a386b8",
+  1: "#7b6ba8",
+  2: "#5a9bd4",
+  3: "#d4b86b",
   4: "#e89aa3",
   5: "#a8c97f",
   6: "#82a8d4",
