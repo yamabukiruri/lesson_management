@@ -12,13 +12,13 @@ import {
 } from "@mui/material";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase";
-import { useAuth } from "../context/authContext";
+import { useAuth } from "../context/auth-context";
 import Loading from "@/components/loading";
 import Panel from "@/components/panel";
 import { CardTitle, SectionTitle } from "@/components/title";
 import { MainBtn, SubBtn } from "@/components/button";
 import { CustomPulldown } from "@/components/input";
-import { LessonCalendarPdf } from "@/components/lessonCalendarPdf";
+import { LessonCalendarPdf } from "@/components/lesson-calendar-pdf";
 import { theme } from "@/library/theme";
 import {
   getCurrentAcademicYear,

@@ -11,7 +11,7 @@ import { MainBtn, SubBtn } from "@/components/button";
 import { CustomTextField } from "@/components/input";
 import { Notice } from "@/components/notice";
 import { theme } from "@/library/theme";
-import { useAuth } from "../context/authContext";
+import { useAuth } from "../context/auth-context";
 import Loading from "@/components/loading";
 
 const LOGO_MAX_SIZE = 256;

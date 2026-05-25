@@ -26,8 +26,8 @@ import { MainBtn } from "@/components/button";
 import { theme } from "@/library/theme";
 import { CustomPulldown, CustomTextField } from "@/components/input";
 import { Notice } from "@/components/notice";
-import { prefList } from "@/library/fixedData";
-import { useAuth } from "@/app/context/authContext";
+import { prefList } from "@/library/fixed-data";
+import { useAuth } from "@/app/context/auth-context";
 import Loading from "@/components/loading";
 
 export default function StudentId() {

@@ -25,11 +25,11 @@ import {
 import { CardTitle } from "@/components/title";
 import { MainBtn } from "@/components/button";
 import { theme } from "@/library/theme";
-import { useAuth } from "./context/authContext";
+import { useAuth } from "./context/auth-context";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/loading";
 import { Student } from "./student/page";
-import CustomTableCell from "@/components/tableCell";
+import CustomTableCell from "@/components/table-cell";
 
 // 修正された型定義
 interface FormattedStudent extends Student {

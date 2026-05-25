@@ -25,7 +25,7 @@ import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useRouter } from "next/navigation";
 import { theme } from "@/library/theme";
-import { useAuth } from "@/app/context/authContext";
+import { useAuth } from "@/app/context/auth-context";
 import { useEffect } from "react";
 import { Button, useMediaQuery } from "@mui/material";
 import { auth } from "@/firebase";

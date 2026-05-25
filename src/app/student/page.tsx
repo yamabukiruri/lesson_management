@@ -19,9 +19,9 @@ import { CardTitle } from "@/components/title";
 import { MainBtn } from "@/components/button";
 import { useRouter } from "next/navigation";
 import { theme } from "@/library/theme";
-import { useAuth } from "../context/authContext";
+import { useAuth } from "../context/auth-context";
 import Loading from "@/components/loading";
-import CustomTableCell from "@/components/tableCell";
+import CustomTableCell from "@/components/table-cell";
 import { CustomTextField } from "@/components/input";
 
 type SortKey = "name" | "age" | "count";

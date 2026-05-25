@@ -4,7 +4,7 @@ import { MainBtn } from "@/components/button";
 import { Box, Typography, Paper } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useAuth } from "../context/authContext";
+import { useAuth } from "../context/auth-context";
 import { theme } from "@/library/theme";
 
 export default function Login() {

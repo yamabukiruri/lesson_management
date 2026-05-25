@@ -3,7 +3,7 @@
 import { Box, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useAuth } from "../context/authContext";
+import { useAuth } from "../context/auth-context";
 import Loading from "@/components/loading";
 
 export default function NotFound() {
