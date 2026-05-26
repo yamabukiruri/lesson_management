@@ -2,23 +2,16 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
-import {
-  Box,
-  CircularProgress,
-  FormControlLabel,
-  Switch,
-  Typography,
-} from "@mui/material";
+import { Box, FormControlLabel, Switch, Typography } from "@mui/material";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 import { useAuth } from "../context/auth-context";
 import Loading from "@/components/loading";
 import Panel from "@/components/panel";
 import { CardTitle, SectionTitle } from "@/components/title";
-import { MainBtn, SubBtn } from "@/components/button";
+import { MainBtn } from "@/components/button";
 import { CustomPulldown } from "@/components/input";
-import { LessonCalendarPdf } from "@/components/lesson-calendar-pdf";
+import { LessonCalendarHtml } from "@/components/lesson-calendar-html";
 import { theme } from "@/library/theme";
 import {
   getCurrentAcademicYear,
@@ -27,61 +20,38 @@ import {
   type Term,
 } from "@/utils/calendar";
 
-function PreviewOverlay({ message }: { message: string }) {
-  return (
-    <Box
-      sx={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: 1.5,
-        backgroundColor: "rgba(255, 255, 255, 0.85)",
-        backdropFilter: "blur(2px)",
-        zIndex: 1,
-      }}
-    >
-      <CircularProgress
-        size={36}
-        sx={{ color: theme.palette.primary.main }}
-      />
-      <Typography
-        sx={{
-          fontSize: "0.9rem",
-          color: "#555",
-          fontFamily: theme.typography.fontFamily,
-        }}
-      >
-        {message}
-      </Typography>
-    </Box>
-  );
+const PRINT_CSS = `
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .lesson-calendar,
+  .lesson-calendar * {
+    visibility: visible;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .lesson-calendar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 297mm;
+    height: 210mm;
+    padding: 8mm !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+    overflow: hidden;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
 }
-
-const PDFViewer = dynamic(
-  () => import("@react-pdf/renderer").then((mod) => mod.PDFViewer),
-  { ssr: false }
-);
-
-const PREVIEW_INITIAL_LOADING_MS = 3000;
-
-interface PreviewProps {
-  academicYear: number;
-  term: Term;
-  classroomName: string | undefined;
-  logoDataUrl: string | undefined;
-}
-
-function useDebouncedValue<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const handle = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(handle);
-  }, [value, delay]);
-  return debounced;
-}
+`;
 
 export default function CalendarPage() {
   const { user, loading } = useAuth();
@@ -95,9 +65,6 @@ export default function CalendarPage() {
   const [includeLogo, setIncludeLogo] = useState(true);
   const [classroomName, setClassroomName] = useState("");
   const [logoDataUrl, setLogoDataUrl] = useState("");
-  const [downloading, setDownloading] = useState(false);
-  const [previewShown, setPreviewShown] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -135,69 +102,11 @@ export default function CalendarPage() {
     []
   );
 
-  const previewProps = useMemo<PreviewProps>(
-    () => ({
-      academicYear,
-      term,
-      classroomName:
-        includeClassroomName && classroomName ? classroomName : undefined,
-      logoDataUrl: includeLogo && logoDataUrl ? logoDataUrl : undefined,
-    }),
-    [
-      academicYear,
-      term,
-      includeClassroomName,
-      classroomName,
-      includeLogo,
-      logoDataUrl,
-    ]
-  );
-
-  const debouncedPreviewProps = useDebouncedValue(previewProps, 500);
-  const isDebouncing = previewProps !== debouncedPreviewProps;
-
-  useEffect(() => {
-    if (!initialLoading) return;
-    const handle = setTimeout(
-      () => setInitialLoading(false),
-      PREVIEW_INITIAL_LOADING_MS
-    );
-    return () => clearTimeout(handle);
-  }, [initialLoading]);
-
-  const handleShowPreview = () => {
-    setInitialLoading(true);
-    setPreviewShown(true);
-  };
-
-  const overlayMessage = initialLoading
-    ? "プレビューを準備中..."
-    : "更新中...";
-  const showOverlay = previewShown && (initialLoading || isDebouncing);
-  const inputsDisabled = showOverlay || downloading;
-
-  const previewPdfDoc = useMemo(
-    () => <LessonCalendarPdf {...debouncedPreviewProps} />,
-    [debouncedPreviewProps]
-  );
-
-  const handleDownload = async () => {
-    setDownloading(true);
-    try {
-      const { pdf } = await import("@react-pdf/renderer");
-      const blob = await pdf(<LessonCalendarPdf {...previewProps} />).toBlob();
-      const url = URL.createObjectURL(blob);
-      const fileName = `${academicYear}年度${getTermLabel(
-        term
-      )}_レッスンカレンダー.pdf`;
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName;
-      a.click();
-      URL.revokeObjectURL(url);
-    } finally {
-      setDownloading(false);
-    }
+  const handlePrint = () => {
+    const originalTitle = document.title;
+    document.title = `${academicYear}年度${getTermLabel(term)}_レッスンカレンダー`;
+    window.print();
+    document.title = originalTitle;
   };
 
   if (loading) {
@@ -210,6 +119,7 @@ export default function CalendarPage() {
 
   return (
     <Box sx={{ width: "100%" }}>
+      <style dangerouslySetInnerHTML={{ __html: PRINT_CSS }} />
       <Panel sx={{ display: "grid" }}>
         <CardTitle label="カレンダー作成" />
         <SectionTitle label="設定" />
@@ -227,7 +137,6 @@ export default function CalendarPage() {
             name="year"
             value={academicYear}
             options={yearOptions}
-            disabled={inputsDisabled}
             onChange={(v) => setAcademicYear(v)}
           />
           <CustomPulldown
@@ -235,7 +144,6 @@ export default function CalendarPage() {
             name="term"
             value={term === "first" ? 0 : 1}
             options={termOptions}
-            disabled={inputsDisabled}
             onChange={(v) => setTerm(v === 0 ? "first" : "second")}
           />
         </Box>
@@ -247,7 +155,7 @@ export default function CalendarPage() {
               <Switch
                 checked={includeClassroomName && !!classroomName}
                 onChange={(e) => setIncludeClassroomName(e.target.checked)}
-                disabled={!classroomName || inputsDisabled}
+                disabled={!classroomName}
               />
             }
             label="教室名を掲載"
@@ -258,7 +166,7 @@ export default function CalendarPage() {
               <Switch
                 checked={includeLogo && !!logoDataUrl}
                 onChange={(e) => setIncludeLogo(e.target.checked)}
-                disabled={!logoDataUrl || inputsDisabled}
+                disabled={!logoDataUrl}
               />
             }
             label="ロゴを掲載"
@@ -281,56 +189,44 @@ export default function CalendarPage() {
           </Typography>
         )}
         <SectionTitle label="プレビュー" sx={{ marginTop: 2 }} />
-        {previewShown ? (
-          <Box
-            sx={{
-              position: "relative",
-              width: "100%",
-              height: { xs: 400, sm: 600 },
-              border: `1px solid ${theme.palette.secondary.main}`,
-              borderRadius: 2,
-              overflow: "hidden",
-            }}
-          >
-            <PDFViewer width="100%" height="100%" showToolbar={false}>
-              {previewPdfDoc}
-            </PDFViewer>
-            {showOverlay && <PreviewOverlay message={overlayMessage} />}
-          </Box>
-        ) : (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 2,
-              width: "100%",
-              height: { xs: 200, sm: 240 },
-              backgroundColor: theme.palette.secondary.light,
-              border: `1px dashed ${theme.palette.secondary.main}`,
-              borderRadius: 2,
-            }}
-          >
-            <Typography
-              sx={{
-                fontSize: "0.9rem",
-                color: "#666",
-                fontFamily: theme.typography.fontFamily,
-              }}
-            >
-              プレビューを表示するには下のボタンを押してください
-            </Typography>
-            <SubBtn label="プレビューを表示" onClick={handleShowPreview} />
-          </Box>
-        )}
+        <Box
+          sx={{
+            width: { xs: "100%", sm: "60%" },
+            margin: "0 auto",
+            border: `1px solid ${theme.palette.secondary.main}`,
+            borderRadius: 2,
+            overflow: "hidden",
+            backgroundColor: "#ffffff",
+          }}
+        >
+          <LessonCalendarHtml
+            academicYear={academicYear}
+            term={term}
+            classroomName={
+              includeClassroomName && classroomName ? classroomName : undefined
+            }
+            logoDataUrl={includeLogo && logoDataUrl ? logoDataUrl : undefined}
+          />
+        </Box>
+        <Typography
+          sx={{
+            fontSize: "0.8rem",
+            color: "#888",
+            fontFamily: theme.typography.fontFamily,
+            marginTop: 1,
+            lineHeight: 1.6,
+          }}
+        >
+          ※ ダウンロードボタンを押すと印刷ダイアログが開きます。「PDFとして保存」を選んでください。
+          <br />
+          ※ 日付やURLがPDFに入る場合は、印刷ダイアログの「ヘッダーとフッター」をオフにしてください。
+        </Typography>
       </Panel>
       <Box sx={{ display: "flex", justifyContent: "center" }}>
         <MainBtn
-          label={downloading ? "生成中..." : "PDFをダウンロード"}
+          label="PDFをダウンロード"
           sx={{ width: 240 }}
-          disabled={inputsDisabled}
-          onClick={handleDownload}
+          onClick={handlePrint}
         />
       </Box>
     </Box>
