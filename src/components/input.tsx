@@ -3,7 +3,9 @@ import {
   TextField,
   SxProps,
   Box,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
@@ -172,5 +174,47 @@ export function CustomPulldown({
         </Select>
       </FormControl>
     </Box>
+  );
+}
+
+interface CustomCheckboxProps {
+  label: string;
+  name: string;
+  checked: boolean;
+  sx?: SxProps;
+  disabled?: boolean;
+  onChange: (checked: boolean) => void;
+}
+
+export function CustomCheckbox({
+  label,
+  name,
+  checked,
+  sx,
+  disabled,
+  onChange,
+}: CustomCheckboxProps) {
+  return (
+    <FormControlLabel
+      control={
+        <Checkbox
+          name={name}
+          checked={checked}
+          disabled={disabled}
+          onChange={(e) => onChange(e.target.checked)}
+          sx={{
+            color: theme.palette.primary.main,
+            "&.Mui-checked": { color: theme.palette.primary.main },
+          }}
+        />
+      }
+      label={label}
+      sx={{
+        "& .MuiFormControlLabel-label": {
+          fontFamily: theme.typography.fontFamily,
+        },
+        ...(sx as object),
+      }}
+    />
   );
 }

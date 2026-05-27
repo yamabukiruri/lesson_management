@@ -1,13 +1,7 @@
 "use client";
 
 import Panel from "@/components/panel";
-import {
-  Box,
-  Checkbox,
-  Divider,
-  FormControlLabel,
-  Typography,
-} from "@mui/material";
+import { Box, Divider, Typography } from "@mui/material";
 import { db } from "../../../firebase";
 import { ChangeEvent, useEffect, useState } from "react";
 import {
@@ -30,7 +24,11 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { MainBtn } from "@/components/button";
 import { theme } from "@/library/theme";
-import { CustomPulldown, CustomTextField } from "@/components/input";
+import {
+  CustomCheckbox,
+  CustomPulldown,
+  CustomTextField,
+} from "@/components/input";
 import { Notice } from "@/components/notice";
 import { prefList } from "@/library/fixed-data";
 import { useAuth } from "@/app/context/auth-context";
@@ -522,24 +520,13 @@ export default function StudentId() {
         <Divider />
         <SectionTitle label="ステータス" sx={{ marginTop: 2 }} />
         <Box sx={{ marginBottom: 1 }}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={!!student.isWithdrawn}
-                onChange={(e) =>
-                  setStudent((prev) => ({
-                    ...prev,
-                    isWithdrawn: e.target.checked,
-                  }))
-                }
-                sx={{
-                  color: theme.palette.primary.main,
-                  "&.Mui-checked": { color: theme.palette.primary.main },
-                }}
-              />
-            }
+          <CustomCheckbox
             label="退会済み"
-            sx={{ fontFamily: theme.typography.fontFamily }}
+            name="isWithdrawn"
+            checked={!!student.isWithdrawn}
+            onChange={(checked) =>
+              setStudent((prev) => ({ ...prev, isWithdrawn: checked }))
+            }
           />
           <Typography
             sx={{
