@@ -14,15 +14,20 @@ import {
 } from "@mui/material";
 import { db } from "../../firebase";
 import { useEffect, useMemo, useState } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot } from "firebase/firestore";
 import { CardTitle } from "@/components/title";
-import { MainBtn } from "@/components/button";
+import { MainBtn, SubBtn } from "@/components/button";
 import { useRouter } from "next/navigation";
 import { theme } from "@/library/theme";
 import { useAuth } from "../context/auth-context";
 import Loading from "@/components/loading";
 import CustomTableCell from "@/components/table-cell";
 import { CustomTextField } from "@/components/input";
+import {
+  RosterPrint,
+  ROSTER_PRINT_CSS,
+  formatRosterDate,
+} from "./roster-print";
 
 type SortKey = "name" | "age" | "count";
 type SortOrder = "asc" | "desc";
@@ -58,6 +63,7 @@ export default function Student() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+  const [classroomName, setClassroomName] = useState("");
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -156,6 +162,30 @@ export default function Student() {
     return () => unsubscribe();
   }, [user]);
 
+  useEffect(() => {
+    if (!user) return;
+    const fetchClassroom = async () => {
+      const docRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setClassroomName(docSnap.data().classroomName ?? "");
+      }
+    };
+    fetchClassroom();
+  }, [user]);
+
+  const handlePrint = () => {
+    if (displayStudents.length === 0) return;
+    const originalTitle = document.title;
+    const titlePrefix = classroomName ? `${classroomName}_` : "";
+    document.title = `${titlePrefix}生徒名簿_${formatRosterDate().replace(
+      /\//g,
+      ""
+    )}`;
+    window.print();
+    document.title = originalTitle;
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -166,6 +196,7 @@ export default function Student() {
 
   return (
     <Box sx={{ width: "100%" }}>
+      <style dangerouslySetInnerHTML={{ __html: ROSTER_PRINT_CSS }} />
       <Panel sx={{ display: "grid" }}>
         <CardTitle label="生徒一覧" />
         <Box sx={{ mb: 2 }}>
@@ -262,7 +293,14 @@ export default function Student() {
           </Typography>
         )}
       </Panel>
-      <Box sx={{ display: "flex", alignItems: "", justifyContent: "center" }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "",
+          justifyContent: "center",
+          gap: 2,
+        }}
+      >
         <MainBtn
           label="新規生徒登録"
           sx={{ width: 160 }}
@@ -270,7 +308,15 @@ export default function Student() {
             router.push("student/0");
           }}
         />
+        <SubBtn
+          label="名簿を印刷"
+          sx={{ width: 160 }}
+          onClick={handlePrint}
+          disabled={displayStudents.length === 0}
+        />
       </Box>
+
+      <RosterPrint students={displayStudents} classroomName={classroomName} />
     </Box>
   );
 }
