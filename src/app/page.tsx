@@ -145,15 +145,20 @@ export default function Home() {
             return timeA - timeB;
           });
 
+          // 退会済みを除外
+          const activeStudents = formattedStudents.filter(
+            ({ docData }) => !docData.isWithdrawn
+          );
+
           // 今日の生徒と忘れた生徒を分ける
-          const todayStudents = formattedStudents.filter(
+          const todayStudents = activeStudents.filter(
             ({ docData }) =>
               docData.isToday ||
               docData.isAttendedToday ||
               docData.isAbsentToday
           );
 
-          const forgottenStudents = formattedStudents.filter(
+          const forgottenStudents = activeStudents.filter(
             ({ docData }) => docData.isForgotten
           );
 

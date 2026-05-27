@@ -1,7 +1,13 @@
 "use client";
 
 import Panel from "@/components/panel";
-import { Box, Divider, Typography } from "@mui/material";
+import {
+  Box,
+  Checkbox,
+  Divider,
+  FormControlLabel,
+  Typography,
+} from "@mui/material";
 import { db } from "../../../firebase";
 import { ChangeEvent, useEffect, useState } from "react";
 import {
@@ -55,6 +61,7 @@ export default function StudentId() {
     city: "",
     street: "",
     building: "",
+    isWithdrawn: false,
   });
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null); //カレンダーで選択した値
   const [attendedDateList, setAttendedDateList] = useState<Dayjs[]>([]); //今までの出席日
@@ -512,6 +519,39 @@ export default function StudentId() {
             sx={{ margin: 0 }}
           />
         </LocalizationProvider>
+        <Divider />
+        <SectionTitle label="ステータス" sx={{ marginTop: 2 }} />
+        <Box sx={{ marginBottom: 1 }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={!!student.isWithdrawn}
+                onChange={(e) =>
+                  setStudent((prev) => ({
+                    ...prev,
+                    isWithdrawn: e.target.checked,
+                  }))
+                }
+                sx={{
+                  color: theme.palette.primary.main,
+                  "&.Mui-checked": { color: theme.palette.primary.main },
+                }}
+              />
+            }
+            label="退会済み"
+            sx={{ fontFamily: theme.typography.fontFamily }}
+          />
+          <Typography
+            sx={{
+              fontSize: "0.8rem",
+              color: "#888",
+              fontFamily: theme.typography.fontFamily,
+              marginLeft: "32px",
+            }}
+          >
+            チェックすると本日の生徒一覧・名簿印刷から除外されます。
+          </Typography>
+        </Box>
       </Panel>
       <Box
         sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}

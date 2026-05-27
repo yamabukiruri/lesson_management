@@ -42,6 +42,7 @@ export interface Student {
   firstNameKana: string;
   gender: number;
   hour: string;
+  isWithdrawn?: boolean;
   lastName: string;
   lastNameKana: string;
   maxCount: string;
@@ -112,6 +113,12 @@ export default function Student() {
     return sorted;
   }, [students, searchQuery, sortKey, sortOrder]);
 
+  // 退会済みを除外したアクティブ生徒 (名簿印刷用)
+  const activeStudents = useMemo(
+    () => displayStudents.filter((s) => !s.isWithdrawn),
+    [displayStudents]
+  );
+
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
@@ -139,6 +146,7 @@ export default function Student() {
               firstNameKana: data.firstNameKana || "",
               gender: data.gender || 0,
               hour: data.hour || "",
+              isWithdrawn: data.isWithdrawn ?? false,
               lastName: data.lastName || "",
               lastNameKana: data.lastNameKana || "",
               maxCount: data.maxCount || "",
@@ -175,7 +183,7 @@ export default function Student() {
   }, [user]);
 
   const handlePrint = () => {
-    if (displayStudents.length === 0) return;
+    if (activeStudents.length === 0) return;
     const originalTitle = document.title;
     const titlePrefix = classroomName ? `${classroomName}_` : "";
     document.title = `${titlePrefix}生徒名簿_${formatRosterDate().replace(
@@ -254,7 +262,10 @@ export default function Student() {
             </TableHead>
             <TableBody>
               {displayStudents.map((student) => (
-                <TableRow key={student.docId}>
+                <TableRow
+                  key={student.docId}
+                  sx={{ opacity: student.isWithdrawn ? 0.55 : 1 }}
+                >
                   <CustomTableCell>
                     <Link
                       href={"/student/" + student.docId}
@@ -265,6 +276,18 @@ export default function Student() {
                     >
                       {student.lastName + " " + student.firstName}
                     </Link>
+                    {student.isWithdrawn && (
+                      <Box
+                        component="span"
+                        sx={{
+                          marginLeft: 1,
+                          fontSize: "0.75rem",
+                          color: "#888",
+                        }}
+                      >
+                        (退会済み)
+                      </Box>
+                    )}
                   </CustomTableCell>
                   <CustomTableCell>{student.age}</CustomTableCell>
                   <CustomTableCell>
@@ -312,11 +335,11 @@ export default function Student() {
           label="名簿を印刷"
           sx={{ width: 160 }}
           onClick={handlePrint}
-          disabled={displayStudents.length === 0}
+          disabled={activeStudents.length === 0}
         />
       </Box>
 
-      <RosterPrint students={displayStudents} classroomName={classroomName} />
+      <RosterPrint students={activeStudents} classroomName={classroomName} />
     </Box>
   );
 }
