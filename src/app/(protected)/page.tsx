@@ -33,7 +33,7 @@ interface StudentInfo {
   id: string;
   lastName: string;
   firstName: string;
-  startDate: Dayjs | null;
+  countStartDate: Dayjs | null;
   maxCount: number;
   isWithdrawn: boolean;
 }
@@ -56,7 +56,11 @@ export default function Home() {
               id: d.id,
               lastName: data.lastName ?? "",
               firstName: data.firstName ?? "",
-              startDate: data.startDate ? dayjs(data.startDate.toDate()) : null,
+              countStartDate: data.countStartDate
+                ? dayjs(data.countStartDate.toDate())
+                : data.startDate
+                ? dayjs(data.startDate.toDate())
+                : null,
               maxCount: Number(data.maxCount ?? 0),
               isWithdrawn: data.isWithdrawn ?? false,
             };
@@ -88,11 +92,11 @@ export default function Home() {
   const consumedMap = useMemo(() => {
     const m = new Map<string, number>();
     students.forEach((s) => {
-      if (!s.startDate) {
+      if (!s.countStartDate) {
         m.set(s.id, 0);
         return;
       }
-      const range = getContractYearRange(s.startDate);
+      const range = getContractYearRange(s.countStartDate);
       const own = lessons.filter((l) => l.studentId === s.id);
       m.set(s.id, countConsumed(own, range));
     });

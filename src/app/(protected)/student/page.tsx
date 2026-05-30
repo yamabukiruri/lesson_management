@@ -50,7 +50,7 @@ interface Doc {
   lastNameKana: string;
   maxCount: number;
   pref: string;
-  startDate: Dayjs | null;
+  countStartDate: Dayjs | null;
   street: string;
 }
 
@@ -77,11 +77,11 @@ export default function Student() {
   const consumedMap = useMemo(() => {
     const m = new Map<string, number>();
     students.forEach((s) => {
-      if (!s.startDate) {
+      if (!s.countStartDate) {
         m.set(s.docId, 0);
         return;
       }
-      const range = getContractYearRange(s.startDate);
+      const range = getContractYearRange(s.countStartDate);
       const own = lessons.filter((l) => l.studentId === s.docId);
       m.set(s.docId, countConsumed(own, range));
     });
@@ -150,7 +150,11 @@ export default function Student() {
             lastNameKana: data.lastNameKana ?? "",
             maxCount: Number(data.maxCount ?? 0),
             pref: data.pref ?? "",
-            startDate: data.startDate ? dayjs(data.startDate.toDate()) : null,
+            countStartDate: data.countStartDate
+              ? dayjs(data.countStartDate.toDate())
+              : data.startDate
+              ? dayjs(data.startDate.toDate())
+              : null,
             street: data.street ?? "",
           };
         });

@@ -8,6 +8,8 @@ export interface Lesson {
   studentId: string;
   date: Dayjs;
   status: LessonStatus;
+  // 年間カウント対象か（単発レッスンは false）
+  countable: boolean;
 }
 
 // 上限にカウントする状態（出席・当日欠席）
@@ -37,6 +39,7 @@ export function countConsumed(
 ): number {
   return lessons.filter(
     (l) =>
+      l.countable &&
       COUNTED_STATUSES.includes(l.status) &&
       !l.date.isBefore(range.start, "day") &&
       l.date.isBefore(range.end, "day")
@@ -46,12 +49,18 @@ export function countConsumed(
 // Firestore ドキュメントから Lesson へ整形（欠損に強い既定値付き）
 export function toLesson(
   id: string,
-  data: { studentId?: string; date?: Timestamp; status?: LessonStatus }
+  data: {
+    studentId?: string;
+    date?: Timestamp;
+    status?: LessonStatus;
+    countable?: boolean;
+  }
 ): Lesson {
   return {
     id,
     studentId: data.studentId ?? "",
     date: data.date ? dayjs(data.date.toDate()) : dayjs(0),
     status: data.status ?? "scheduled",
+    countable: data.countable ?? true,
   };
 }

@@ -42,6 +42,18 @@ import {
   type Lesson,
 } from "@/utils/lesson";
 
+function LegendItem({ color, label }: { color: string; label: string }) {
+  return (
+    <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+      <Box
+        component="span"
+        sx={{ width: 14, height: 14, borderRadius: "50%", backgroundColor: color }}
+      />
+      {label}
+    </Box>
+  );
+}
+
 export default function StudentId() {
   const { user } = useAuth();
   const params = useParams();
@@ -56,6 +68,7 @@ export default function StudentId() {
     firstNameKana: "",
     age: "",
     startDate: defaultDate,
+    countStartDate: defaultDate,
     maxCount: 0,
     hour: 0,
     minute: 0,
@@ -68,7 +81,10 @@ export default function StudentId() {
   });
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null); //カレンダーで選択した値
   const [lessons, setLessons] = useState<Lesson[]>([]); //この生徒の既存レッスン
-  const [scheduledDraft, setScheduledDraft] = useState<Dayjs[]>([]); //編集中の予定日
+  const [scheduledDraft, setScheduledDraft] = useState<
+    { date: Dayjs; countable: boolean }[]
+  >([]); //編集中の予定日（countable=false は単発）
+  const [singleMode, setSingleMode] = useState(false); //カレンダー登録モード（true=単発）
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [isNotFound, setIsNotFound] = useState(false);
@@ -94,6 +110,11 @@ export default function StudentId() {
         startDate: data.startDate
           ? data.startDate.toDate().toISOString().split("T")[0]
           : defaultDate,
+        countStartDate: data.countStartDate
+          ? data.countStartDate.toDate().toISOString().split("T")[0]
+          : data.startDate
+          ? data.startDate.toDate().toISOString().split("T")[0]
+          : defaultDate,
         maxCount: data.maxCount ?? 0,
         hour: data.hour ?? 0,
         minute: data.minute ?? 0,
@@ -113,7 +134,9 @@ export default function StudentId() {
       const fetched = lessonSnap.docs.map((d) => toLesson(d.id, d.data()));
       setLessons(fetched);
       setScheduledDraft(
-        fetched.filter((l) => l.status === "scheduled").map((l) => l.date)
+        fetched
+          .filter((l) => l.status === "scheduled")
+          .map((l) => ({ date: l.date, countable: l.countable }))
       );
     };
     fetchStudent();
@@ -193,7 +216,11 @@ export default function StudentId() {
     }
 
     if (!student.startDate || !dayjs(student.startDate).isValid()) {
-      e.startDate = "レッスン開始日を入力してください";
+      e.startDate = "入学日を入力してください";
+    }
+
+    if (!student.countStartDate || !dayjs(student.countStartDate).isValid()) {
+      e.countStartDate = "カウント開始日を入力してください";
     }
 
     return e;
@@ -210,10 +237,10 @@ export default function StudentId() {
     if (consumedOnDay) return;
 
     setScheduledDraft((prev) => {
-      const exists = prev.some((d) => d.isSame(day, "day"));
+      const exists = prev.some((d) => d.date.isSame(day, "day"));
       return exists
-        ? prev.filter((d) => !d.isSame(day, "day")) // クリックで削除
-        : [...prev, day]; // クリックで追加
+        ? prev.filter((d) => !d.date.isSame(day, "day")) // クリックで削除
+        : [...prev, { date: day, countable: !singleMode }]; // クリックで追加
     });
     setSelectedDate(day);
   };
@@ -222,13 +249,21 @@ export default function StudentId() {
   const CustomDay = (props: { day: Dayjs }) => {
     const { day, ...other } = props;
 
-    const isScheduled = scheduledDraft.some((d) => d.isSame(day, "day"));
-    const isAttended = lessons.some(
+    const draftEntry = scheduledDraft.find((d) => d.date.isSame(day, "day"));
+    const isScheduled = !!draftEntry;
+    const attendedLesson = lessons.find(
       (l) => l.status === "attended" && l.date.isSame(day, "day")
     );
-    const isAbsent = lessons.some(
+    const absentLesson = lessons.find(
       (l) => l.status === "absent" && l.date.isSame(day, "day")
     );
+    const isAttended = !!attendedLesson;
+    const isAbsent = !!absentLesson;
+    // 単発（年間カウント外）レッスン
+    const isSingle =
+      (draftEntry && !draftEntry.countable) ||
+      (attendedLesson && !attendedLesson.countable) ||
+      (absentLesson && !absentLesson.countable);
 
     return (
       <PickersDay
@@ -245,11 +280,15 @@ export default function StudentId() {
           backgroundColor: isAttended
             ? `${theme.palette.secondary.main} !important`
             : isScheduled
-            ? `${theme.palette.primary.main} !important`
+            ? draftEntry?.countable
+              ? `${theme.palette.primary.main} !important`
+              : `${theme.palette.tertiary.main} !important`
             : "transparent !important",
           color: "black !important",
           borderRadius: "50%",
-          border: isAbsent
+          border: isSingle
+            ? `2px dashed ${theme.palette.tertiary.dark} !important`
+            : isAbsent
             ? `1px dotted ${theme.palette.primary.main} !important`
             : undefined,
         }}
@@ -285,6 +324,9 @@ export default function StudentId() {
       startDate: Timestamp.fromDate(
         dayjs(student.startDate).startOf("day").toDate()
       ),
+      countStartDate: Timestamp.fromDate(
+        dayjs(student.countStartDate).startOf("day").toDate()
+      ),
     };
 
     const studentsRef = collection(db, "users", user.uid, "students");
@@ -304,24 +346,31 @@ export default function StudentId() {
     const existingScheduled = lessons.filter((l) => l.status === "scheduled");
 
     const toCreate = scheduledDraft.filter(
-      (d) => !existingScheduled.some((l) => l.date.isSame(d, "day"))
+      (d) => !existingScheduled.some((l) => l.date.isSame(d.date, "day"))
     );
     const toDelete = existingScheduled.filter(
-      (l) => !scheduledDraft.some((d) => d.isSame(l.date, "day"))
+      (l) => !scheduledDraft.some((d) => d.date.isSame(l.date, "day"))
     );
+    // 日付は同じだが単発フラグが変わったもの
+    const toUpdate = existingScheduled.filter((l) => {
+      const d = scheduledDraft.find((d) => d.date.isSame(l.date, "day"));
+      return d && d.countable !== l.countable;
+    });
 
     const lessonsRef = collection(db, "users", user.uid, "lessons");
     toCreate.forEach((d) => {
-      const dt = d
-        .startOf("day")
-        .hour(hourNum)
-        .minute(minuteNum)
-        .second(0);
+      const dt = d.date.startOf("day").hour(hourNum).minute(minuteNum).second(0);
       batch.set(doc(lessonsRef), {
         studentId,
         date: Timestamp.fromDate(dt.toDate()),
         status: "scheduled",
+        countable: d.countable,
       });
+    });
+    toUpdate.forEach((l) => {
+      const d = scheduledDraft.find((d) => d.date.isSame(l.date, "day"));
+      if (!d) return;
+      batch.update(doc(lessonsRef, l.id), { countable: d.countable });
     });
     toDelete.forEach((l) => {
       batch.delete(doc(lessonsRef, l.id));
@@ -338,8 +387,8 @@ export default function StudentId() {
   }
 
   const contractRange =
-    student.startDate && dayjs(student.startDate).isValid()
-      ? getContractYearRange(dayjs(student.startDate))
+    student.countStartDate && dayjs(student.countStartDate).isValid()
+      ? getContractYearRange(dayjs(student.countStartDate))
       : null;
   const consumed = contractRange ? countConsumed(lessons, contractRange) : 0;
 
@@ -475,13 +524,26 @@ export default function StudentId() {
           }}
         >
           <CustomTextField
-            label="レッスン開始日"
+            label="入学日"
             name="startDate"
             value={student.startDate}
             type="date"
             required
             error={!!errors.startDate}
             helperText={errors.startDate}
+            onChange={handleTextField}
+          />
+          <CustomTextField
+            label="カウント開始日"
+            name="countStartDate"
+            value={student.countStartDate}
+            type="date"
+            required
+            error={!!errors.countStartDate}
+            helperText={
+              errors.countStartDate ??
+              "この日から1年間が年間カウントの対象期間です（入学月を単発扱いにする場合は翌月初を指定）"
+            }
             onChange={handleTextField}
           />
           <CustomTextField
@@ -549,6 +611,44 @@ export default function StudentId() {
         )}
         <Divider />
         <SectionTitle label="今回分スケジュール" sx={{ marginTop: 2 }} />
+        <Box sx={{ marginBottom: 1 }}>
+          <CustomCheckbox
+            label="単発として登録（年間カウントに含めない）"
+            name="singleMode"
+            checked={singleMode}
+            onChange={(checked) => setSingleMode(checked)}
+          />
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 2,
+            marginBottom: 1,
+            fontSize: "0.8rem",
+            fontFamily: theme.typography.fontFamily,
+            color: "#666",
+          }}
+        >
+          <LegendItem color={theme.palette.primary.main} label="予定" />
+          <LegendItem
+            color={theme.palette.tertiary.main}
+            label="単発予定"
+          />
+          <LegendItem color={theme.palette.secondary.main} label="出席" />
+          <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Box
+              component="span"
+              sx={{
+                width: 14,
+                height: 14,
+                borderRadius: "50%",
+                border: `1px dotted ${theme.palette.primary.main}`,
+              }}
+            />
+            欠席
+          </Box>
+        </Box>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateCalendar
             value={selectedDate}
