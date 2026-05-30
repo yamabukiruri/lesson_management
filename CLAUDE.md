@@ -115,6 +115,12 @@ npm install <package>@<version>
 
 ---
 
+## Git / コミット規約
+
+- コミットメッセージに `Co-Authored-By: Claude ...` などの共著者トレーラーを**付けない**
+
+---
+
 ## 起動時の推奨アクション
 
 ```bash

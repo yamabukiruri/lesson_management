@@ -14,7 +14,7 @@ import {
   addDoc,
 } from "firebase/firestore";
 import { CardTitle, SectionTitle } from "@/components/title";
-import { useParams, useRouter } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import dayjs, { Dayjs } from "dayjs";
 import {
   DateCalendar,
@@ -65,6 +65,7 @@ export default function StudentId() {
   const [absentDateList, setAbsentDateList] = useState<Dayjs[]>([]); //今までの欠席日
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [isNotFound, setIsNotFound] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -88,13 +89,12 @@ export default function StudentId() {
             data.absentDate.map((date: string) => dayjs(date.split(" ")[0]))
           );
         } else {
-          console.warn("データがありません");
-          router.push("/not-found");
+          setIsNotFound(true);
         }
       };
       fetchStudent();
     }
-  }, [user, router, id]);
+  }, [user, id]);
 
   const handleTextField = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -312,6 +312,10 @@ export default function StudentId() {
     setSnackbarOpen(true);
     setTimeout(() => router.back(), 1500);
   };
+
+  if (isNotFound) {
+    notFound();
+  }
 
   return (
     <Box sx={{ width: "100%" }}>
