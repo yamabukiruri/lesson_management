@@ -2,7 +2,7 @@
 
 import Panel from "@/components/panel";
 import { Box, Divider, Typography } from "@mui/material";
-import { db } from "../../../firebase";
+import { db } from "@/firebase";
 import { ChangeEvent, useEffect, useState } from "react";
 import {
   doc,
@@ -32,10 +32,9 @@ import {
 import { Notice } from "@/components/notice";
 import { prefList } from "@/library/fixed-data";
 import { useAuth } from "@/app/context/auth-context";
-import Loading from "@/components/loading";
 
 export default function StudentId() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const params = useParams();
   const id = params["id"] as string;
   const router = useRouter();
@@ -68,9 +67,6 @@ export default function StudentId() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-    }
     if (!user) return;
     if (id !== "0") {
       const fetchStudent = async () => {
@@ -98,7 +94,7 @@ export default function StudentId() {
       };
       fetchStudent();
     }
-  }, [user, loading, router, id]);
+  }, [user, router, id]);
 
   const handleTextField = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -316,14 +312,6 @@ export default function StudentId() {
     setSnackbarOpen(true);
     setTimeout(() => router.back(), 1500);
   };
-
-  if (loading) {
-    return <Loading />;
-  }
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <Box sx={{ width: "100%" }}>

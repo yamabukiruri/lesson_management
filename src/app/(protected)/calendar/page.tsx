@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Box, FormControlLabel, Switch, Typography } from "@mui/material";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../firebase";
-import { useAuth } from "../context/auth-context";
-import Loading from "@/components/loading";
+import { db } from "@/firebase";
+import { useAuth } from "@/app/context/auth-context";
 import Panel from "@/components/panel";
 import { CardTitle, SectionTitle } from "@/components/title";
 import { MainBtn } from "@/components/button";
@@ -54,8 +52,7 @@ const PRINT_CSS = `
 `;
 
 export default function CalendarPage() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
 
   const [academicYear, setAcademicYear] = useState<number>(
     getCurrentAcademicYear()
@@ -65,12 +62,6 @@ export default function CalendarPage() {
   const [includeLogo, setIncludeLogo] = useState(true);
   const [classroomName, setClassroomName] = useState("");
   const [logoDataUrl, setLogoDataUrl] = useState("");
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-    }
-  }, [user, loading, router]);
 
   useEffect(() => {
     if (!user) return;
@@ -108,14 +99,6 @@ export default function CalendarPage() {
     window.print();
     document.title = originalTitle;
   };
-
-  if (loading) {
-    return <Loading />;
-  }
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <Box sx={{ width: "100%" }}>

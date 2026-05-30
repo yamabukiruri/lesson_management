@@ -12,15 +12,14 @@ import {
   TableSortLabel,
   Typography,
 } from "@mui/material";
-import { db } from "../../firebase";
+import { db } from "@/firebase";
 import { useEffect, useMemo, useState } from "react";
 import { collection, doc, getDoc, onSnapshot } from "firebase/firestore";
 import { CardTitle } from "@/components/title";
 import { MainBtn, SubBtn } from "@/components/button";
 import { useRouter } from "next/navigation";
 import { theme } from "@/library/theme";
-import { useAuth } from "../context/auth-context";
-import Loading from "@/components/loading";
+import { useAuth } from "@/app/context/auth-context";
 import CustomTableCell from "@/components/table-cell";
 import { CustomTextField } from "@/components/input";
 import {
@@ -58,7 +57,7 @@ interface Doc extends Student {
 }
 
 export default function Student() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const [students, setStudents] = useState<Doc[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -118,12 +117,6 @@ export default function Student() {
     () => displayStudents.filter((s) => !s.isWithdrawn),
     [displayStudents]
   );
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-    }
-  }, [user, loading, router]);
 
   useEffect(() => {
     if (!user) return;
@@ -193,14 +186,6 @@ export default function Student() {
     window.print();
     document.title = originalTitle;
   };
-
-  if (loading) {
-    return <Loading />;
-  }
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <Box sx={{ width: "100%" }}>

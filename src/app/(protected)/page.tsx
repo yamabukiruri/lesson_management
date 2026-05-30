@@ -12,7 +12,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { db } from "../firebase";
+import { db } from "@/firebase";
 import { useEffect, useState, useCallback } from "react";
 import {
   collection,
@@ -25,9 +25,7 @@ import {
 import { CardTitle } from "@/components/title";
 import { MainBtn } from "@/components/button";
 import { theme } from "@/library/theme";
-import { useAuth } from "./context/auth-context";
-import { useRouter } from "next/navigation";
-import Loading from "@/components/loading";
+import { useAuth } from "@/app/context/auth-context";
 import { Student } from "./student/page";
 import CustomTableCell from "@/components/table-cell";
 
@@ -46,17 +44,10 @@ interface Doc {
 }
 
 export default function Home() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
 
   const [students, setStudents] = useState<Doc[]>([]);
   const [forgottenStudents, setForgottenStudents] = useState<Doc[]>([]);
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-    }
-  }, [user, loading, router]);
 
   // 日付境界を作成するヘルパー関数
   const createDateBoundaries = useCallback(() => {
@@ -495,14 +486,6 @@ export default function Home() {
     ),
     [StudentTableRow]
   );
-
-  if (loading) {
-    return <Loading />;
-  }
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <Box sx={{ width: "100%" }}>

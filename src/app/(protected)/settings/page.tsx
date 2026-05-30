@@ -2,17 +2,15 @@
 
 import Panel from "@/components/panel";
 import { Box, Divider, Typography } from "@mui/material";
-import { db } from "../../firebase";
+import { db } from "@/firebase";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { CardTitle, SectionTitle } from "@/components/title";
-import { useRouter } from "next/navigation";
 import { MainBtn, SubBtn } from "@/components/button";
 import { CustomTextField } from "@/components/input";
 import { Notice } from "@/components/notice";
 import { theme } from "@/library/theme";
-import { useAuth } from "../context/auth-context";
-import Loading from "@/components/loading";
+import { useAuth } from "@/app/context/auth-context";
 
 const LOGO_MAX_SIZE = 256;
 const LOGO_FILE_LIMIT_BYTES = 10 * 1024 * 1024;
@@ -50,8 +48,7 @@ async function resizeImageToDataUrl(
 }
 
 export default function Settings() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
+  const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [classroomName, setClassroomName] = useState("");
@@ -61,12 +58,6 @@ export default function Settings() {
   const [logoProcessing, setLogoProcessing] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-    }
-  }, [user, loading, router]);
 
   useEffect(() => {
     if (!user) return;
@@ -136,14 +127,6 @@ export default function Settings() {
       setSaving(false);
     }
   };
-
-  if (loading) {
-    return <Loading />;
-  }
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <Box sx={{ width: "100%" }}>
