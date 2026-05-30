@@ -18,7 +18,16 @@ export default function Login() {
   }, [user, router]);
 
   return (
-    <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
+    <Box
+      sx={{
+        width: "100%",
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        p: 2,
+      }}
+    >
       {!user && (
         <Paper
           elevation={6}

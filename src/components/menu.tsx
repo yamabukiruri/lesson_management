@@ -25,8 +25,6 @@ import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useRouter } from "next/navigation";
 import { theme } from "@/library/theme";
-import { useAuth } from "@/app/context/auth-context";
-import { useEffect } from "react";
 import { Button, useMediaQuery } from "@mui/material";
 import { auth } from "@/firebase";
 
@@ -138,15 +136,8 @@ const menuList = [
 ];
 
 export default function MenuBar() {
-  const { user, loading } = useAuth();
   const router = useRouter();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login");
-    }
-  }, [user, loading, router]);
 
   const [open, setOpen] = React.useState(false);
 
@@ -209,10 +200,6 @@ export default function MenuBar() {
     </>
   );
 
-  // if (!user) {
-  //   return <Box />;
-  // }
-
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
@@ -233,7 +220,7 @@ export default function MenuBar() {
             <IconButton
               color="inherit"
               aria-label="open drawer"
-              onClick={user ? handleDrawerOpen : () => {}}
+              onClick={handleDrawerOpen}
               edge="start"
               sx={[
                 {
@@ -264,7 +251,6 @@ export default function MenuBar() {
               sx={{
                 color: "inherit",
                 gap: 1,
-                display: user ? "flex" : "none",
               }}
               onClick={() => {
                 if (confirm("ログアウトしますか？")) {
@@ -294,18 +280,13 @@ export default function MenuBar() {
           onClose={handleDrawerClose}
           ModalProps={{ keepMounted: true }}
           sx={{
-            display: user ? "block" : "none",
             "& .MuiDrawer-paper": { width: drawerWidth },
           }}
         >
           {drawerContent}
         </MuiDrawer>
       ) : (
-        <Drawer
-          variant="permanent"
-          open={open}
-          sx={{ display: user ? "block" : "none" }}
-        >
+        <Drawer variant="permanent" open={open}>
           {drawerContent}
         </Drawer>
       )}

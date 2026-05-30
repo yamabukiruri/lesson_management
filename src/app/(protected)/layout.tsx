@@ -2,7 +2,9 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Box } from "@mui/material";
 import { useAuth } from "@/app/context/auth-context";
+import MenuBar from "@/components/menu";
 import Loading from "@/components/loading";
 
 export default function ProtectedLayout({
@@ -27,5 +29,10 @@ export default function ProtectedLayout({
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <Box sx={{ display: "flex" }}>
+      <MenuBar />
+      <main>{children}</main>
+    </Box>
+  );
 }
