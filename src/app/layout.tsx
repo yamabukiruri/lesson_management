@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Lesson Manager",
   description: "ピアノ教室向けレッスン管理アプリ",
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({
