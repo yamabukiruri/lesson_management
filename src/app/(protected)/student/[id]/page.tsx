@@ -8,10 +8,12 @@ import {
   doc,
   getDoc,
   DocumentData,
-  updateDoc,
   Timestamp,
   collection,
-  addDoc,
+  query,
+  where,
+  getDocs,
+  writeBatch,
 } from "firebase/firestore";
 import { CardTitle, SectionTitle } from "@/components/title";
 import { notFound, useParams, useRouter } from "next/navigation";
@@ -32,6 +34,13 @@ import {
 import { Notice } from "@/components/notice";
 import { prefList } from "@/library/fixed-data";
 import { useAuth } from "@/app/context/auth-context";
+import {
+  COUNTED_STATUSES,
+  countConsumed,
+  getContractYearRange,
+  toLesson,
+  type Lesson,
+} from "@/utils/lesson";
 
 export default function StudentId() {
   const { user } = useAuth();
@@ -48,9 +57,6 @@ export default function StudentId() {
     age: "",
     startDate: defaultDate,
     maxCount: 0,
-    attendedDate: [],
-    absentDate: [],
-    schedule: [],
     hour: 0,
     minute: 0,
     gender: 0,
@@ -61,39 +67,58 @@ export default function StudentId() {
     isWithdrawn: false,
   });
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null); //カレンダーで選択した値
-  const [attendedDateList, setAttendedDateList] = useState<Dayjs[]>([]); //今までの出席日
-  const [absentDateList, setAbsentDateList] = useState<Dayjs[]>([]); //今までの欠席日
+  const [lessons, setLessons] = useState<Lesson[]>([]); //この生徒の既存レッスン
+  const [scheduledDraft, setScheduledDraft] = useState<Dayjs[]>([]); //編集中の予定日
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [isNotFound, setIsNotFound] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    if (id !== "0") {
-      const fetchStudent = async () => {
-        const docRef = doc(db, "users", user.uid, "students", id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setStudent({
-            ...data,
-            startDate: data.startDate.toDate().toISOString().split("T")[0],
-            schedule: data.schedule.map((date: string) =>
-              dayjs(date.split(" ")[0])
-            ),
-          });
-          setAttendedDateList(
-            data.attendedDate.map((date: string) => dayjs(date.split(" ")[0]))
-          );
-          setAbsentDateList(
-            data.absentDate.map((date: string) => dayjs(date.split(" ")[0]))
-          );
-        } else {
-          setIsNotFound(true);
-        }
-      };
-      fetchStudent();
-    }
+    if (id === "0") return;
+
+    const fetchStudent = async () => {
+      const docRef = doc(db, "users", user.uid, "students", id);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        setIsNotFound(true);
+        return;
+      }
+      const data = docSnap.data();
+      setStudent({
+        lastName: data.lastName ?? "",
+        firstName: data.firstName ?? "",
+        lastNameKana: data.lastNameKana ?? "",
+        firstNameKana: data.firstNameKana ?? "",
+        age: data.age ?? "",
+        startDate: data.startDate
+          ? data.startDate.toDate().toISOString().split("T")[0]
+          : defaultDate,
+        maxCount: data.maxCount ?? 0,
+        hour: data.hour ?? 0,
+        minute: data.minute ?? 0,
+        gender: data.gender ?? 0,
+        pref: data.pref ?? 0,
+        city: data.city ?? "",
+        street: data.street ?? "",
+        building: data.building ?? "",
+        isWithdrawn: data.isWithdrawn ?? false,
+      });
+
+      const q = query(
+        collection(db, "users", user.uid, "lessons"),
+        where("studentId", "==", id)
+      );
+      const lessonSnap = await getDocs(q);
+      const fetched = lessonSnap.docs.map((d) => toLesson(d.id, d.data()));
+      setLessons(fetched);
+      setScheduledDraft(
+        fetched.filter((l) => l.status === "scheduled").map((l) => l.date)
+      );
+    };
+    fetchStudent();
+    // defaultDate は描画毎の値なので依存に含めない
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, id]);
 
   const handleTextField = (e: ChangeEvent<HTMLInputElement>) => {
@@ -112,7 +137,7 @@ export default function StudentId() {
   };
 
   // ひらがな(長音符を含む)のみ許可
-  const KANA_REGEX = /^[\u3040-\u309Fー]+$/;
+  const KANA_REGEX = /^[぀-ゟー]+$/;
 
   const validate = (): Record<string, string> => {
     const e: Record<string, string> = {};
@@ -175,54 +200,34 @@ export default function StudentId() {
   };
 
   const handleCalendar = (day: Dayjs) => {
-    const lastAttendedDate =
-      attendedDateList.length > 0
-        ? attendedDateList[attendedDateList.length - 1].startOf("day")
-        : null;
-    const lastAbsentDate =
-      absentDateList.length > 0
-        ? absentDateList[absentDateList.length - 1].startOf("day")
-        : null;
-    const today = dayjs().startOf("day");
-    if (
-      day.isBefore(today, "day") ||
-      lastAttendedDate?.isSame(day, "day") ||
-      lastAbsentDate?.isSame(day, "day")
-    ) {
-      return; // 昨日以前は選択できない。また、本日出欠登録が完了しているなら、本日も選択できない。
-    }
-    setStudent((prevState) => {
-      const exists = prevState.schedule.some((date: dayjs.Dayjs) =>
-        date.isSame(day, "day")
-      );
-      const newSchedule = exists
-        ? prevState.schedule.filter(
-            (date: dayjs.Dayjs) => !date.isSame(day, "day")
-          ) // クリックで削除
-        : [...prevState.schedule, day]; // クリックで追加
+    const startOfToday = dayjs().startOf("day");
+    // 過去日は予定にできない
+    if (day.isBefore(startOfToday, "day")) return;
+    // 既に出席/欠席が登録済みの日は変更できない
+    const consumedOnDay = lessons.some(
+      (l) => COUNTED_STATUSES.includes(l.status) && l.date.isSame(day, "day")
+    );
+    if (consumedOnDay) return;
 
-      return { ...prevState, schedule: newSchedule };
+    setScheduledDraft((prev) => {
+      const exists = prev.some((d) => d.isSame(day, "day"));
+      return exists
+        ? prev.filter((d) => !d.isSame(day, "day")) // クリックで削除
+        : [...prev, day]; // クリックで追加
     });
-
-    setSelectedDate(day); // カレンダーの選択状態を更新
+    setSelectedDate(day);
   };
 
-  //スケジュールをハイライト
+  //スケジュール・出欠をハイライト
   const CustomDay = (props: { day: Dayjs }) => {
     const { day, ...other } = props;
-    const formattedDay = day.format("YYYY-MM-DD");
 
-    const isScheduled = student.schedule.some(
-      (date: { format: (arg0: string) => string }) =>
-        date.format("YYYY-MM-DD") === formattedDay
+    const isScheduled = scheduledDraft.some((d) => d.isSame(day, "day"));
+    const isAttended = lessons.some(
+      (l) => l.status === "attended" && l.date.isSame(day, "day")
     );
-    const isAttended = attendedDateList.some(
-      (date: { format: (arg0: string) => string }) =>
-        date.format("YYYY-MM-DD") === formattedDay
-    );
-    const isAbsent = absentDateList.some(
-      (date: { format: (arg0: string) => string }) =>
-        date.format("YYYY-MM-DD") === formattedDay
+    const isAbsent = lessons.some(
+      (l) => l.status === "absent" && l.date.isSame(day, "day")
     );
 
     return (
@@ -239,7 +244,7 @@ export default function StudentId() {
           fontWeight: "700 !important",
           backgroundColor: isAttended
             ? `${theme.palette.secondary.main} !important`
-            : (selectedDate?.isSame(day, "day") && isScheduled) || isScheduled
+            : isScheduled
             ? `${theme.palette.primary.main} !important`
             : "transparent !important",
           color: "black !important",
@@ -262,53 +267,68 @@ export default function StudentId() {
       return;
     }
 
-    //新規作成
+    const studentData = {
+      lastName: student.lastName,
+      firstName: student.firstName,
+      lastNameKana: student.lastNameKana,
+      firstNameKana: student.firstNameKana,
+      age: student.age,
+      gender: student.gender,
+      pref: student.pref,
+      city: student.city,
+      street: student.street,
+      building: student.building,
+      hour: student.hour,
+      minute: student.minute,
+      maxCount: student.maxCount,
+      isWithdrawn: student.isWithdrawn,
+      startDate: Timestamp.fromDate(
+        dayjs(student.startDate).startOf("day").toDate()
+      ),
+    };
+
+    const studentsRef = collection(db, "users", user.uid, "students");
+    const studentRef = id === "0" ? doc(studentsRef) : doc(studentsRef, id);
+    const studentId = studentRef.id;
+
+    const batch = writeBatch(db);
     if (id === "0") {
-      const docRef = collection(db, "users", user.uid, "students");
-      await addDoc(docRef, {
-        ...student,
-        startDate: Timestamp.fromDate(
-          dayjs(student.startDate).startOf("day").toDate()
-        ),
-        schedule: student.schedule
-          .map((date: Dayjs) =>
-            date
-              .startOf("day")
-              .set("hour", student.hour)
-              .set("minute", student.minute)
-              .set("second", 0)
-              .format("YYYY-MM-DD HH:mm:ss")
-          )
-          .sort(
-            (a: string, b: string) =>
-              dayjs(a, "YYYY-MM-DD HH:mm:ss").valueOf() -
-              dayjs(b, "YYYY-MM-DD HH:mm:ss").valueOf()
-          ), //形を整えた後、古い順にソート
-      });
-      //更新
+      batch.set(studentRef, studentData);
     } else {
-      const docRef = doc(db, "users", user.uid, "students", id);
-      await updateDoc(docRef, {
-        ...student,
-        startDate: Timestamp.fromDate(
-          dayjs(student.startDate).startOf("day").toDate()
-        ),
-        schedule: student.schedule
-          .map((date: Dayjs) =>
-            date
-              .startOf("day")
-              .set("hour", student.hour)
-              .set("minute", student.minute)
-              .set("second", 0)
-              .format("YYYY-MM-DD HH:mm:ss")
-          )
-          .sort(
-            (a: string, b: string) =>
-              dayjs(a, "YYYY-MM-DD HH:mm:ss").valueOf() -
-              dayjs(b, "YYYY-MM-DD HH:mm:ss").valueOf()
-          ), //形を整えた後、古い順にソート
-      });
+      batch.update(studentRef, studentData);
     }
+
+    // 予定レッスンの差分反映（出席/欠席済みは触らない）
+    const hourNum = Number(student.hour);
+    const minuteNum = Number(student.minute);
+    const existingScheduled = lessons.filter((l) => l.status === "scheduled");
+
+    const toCreate = scheduledDraft.filter(
+      (d) => !existingScheduled.some((l) => l.date.isSame(d, "day"))
+    );
+    const toDelete = existingScheduled.filter(
+      (l) => !scheduledDraft.some((d) => d.isSame(l.date, "day"))
+    );
+
+    const lessonsRef = collection(db, "users", user.uid, "lessons");
+    toCreate.forEach((d) => {
+      const dt = d
+        .startOf("day")
+        .hour(hourNum)
+        .minute(minuteNum)
+        .second(0);
+      batch.set(doc(lessonsRef), {
+        studentId,
+        date: Timestamp.fromDate(dt.toDate()),
+        status: "scheduled",
+      });
+    });
+    toDelete.forEach((l) => {
+      batch.delete(doc(lessonsRef, l.id));
+    });
+
+    await batch.commit();
+
     setSnackbarOpen(true);
     setTimeout(() => router.back(), 1500);
   };
@@ -316,6 +336,12 @@ export default function StudentId() {
   if (isNotFound) {
     notFound();
   }
+
+  const contractRange =
+    student.startDate && dayjs(student.startDate).isValid()
+      ? getContractYearRange(dayjs(student.startDate))
+      : null;
+  const consumed = contractRange ? countConsumed(lessons, contractRange) : 0;
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -499,6 +525,28 @@ export default function StudentId() {
             <Typography>〜</Typography>
           </Box>
         </Box>
+        {id !== "0" && contractRange && (
+          <Typography
+            sx={{
+              fontFamily: theme.typography.fontFamily,
+              marginBottom: 2,
+              color:
+                consumed >= Number(student.maxCount)
+                  ? theme.palette.primary.dark
+                  : "inherit",
+              fontWeight: consumed >= Number(student.maxCount) ? 700 : 400,
+            }}
+          >
+            今年度の消化レッスン: {consumed} / {student.maxCount} 回
+            <Box
+              component="span"
+              sx={{ fontSize: "0.8rem", color: "#888", marginLeft: 1 }}
+            >
+              （{contractRange.start.format("YYYY/MM/DD")}〜
+              {contractRange.end.subtract(1, "day").format("YYYY/MM/DD")}）
+            </Box>
+          </Typography>
+        )}
         <Divider />
         <SectionTitle label="今回分スケジュール" sx={{ marginTop: 2 }} />
         <LocalizationProvider dateAdapter={AdapterDayjs}>

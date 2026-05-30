@@ -18,10 +18,17 @@ import { collection, doc, getDoc, onSnapshot } from "firebase/firestore";
 import { CardTitle } from "@/components/title";
 import { MainBtn, SubBtn } from "@/components/button";
 import { useRouter } from "next/navigation";
+import dayjs, { Dayjs } from "dayjs";
 import { theme } from "@/library/theme";
 import { useAuth } from "@/app/context/auth-context";
 import CustomTableCell from "@/components/table-cell";
 import { CustomTextField } from "@/components/input";
+import {
+  countConsumed,
+  getContractYearRange,
+  toLesson,
+  type Lesson,
+} from "@/utils/lesson";
 import {
   RosterPrint,
   ROSTER_PRINT_CSS,
@@ -31,35 +38,27 @@ import {
 type SortKey = "name" | "age" | "count";
 type SortOrder = "asc" | "desc";
 
-export interface Student {
-  absentDate: string[];
+interface Doc {
+  docId: string;
   age: number;
-  attendedDate: string[];
   building: string;
   city: string;
   firstName: string;
   firstNameKana: string;
-  gender: number;
-  hour: string;
-  isWithdrawn?: boolean;
+  isWithdrawn: boolean;
   lastName: string;
   lastNameKana: string;
-  maxCount: string;
-  minute: string;
+  maxCount: number;
   pref: string;
-  schedule: string[];
-  startDate: string;
+  startDate: Dayjs | null;
   street: string;
-}
-
-interface Doc extends Student {
-  docId: string;
 }
 
 export default function Student() {
   const { user } = useAuth();
   const router = useRouter();
   const [students, setStudents] = useState<Doc[]>([]);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
@@ -73,6 +72,21 @@ export default function Student() {
       setSortOrder("desc");
     }
   };
+
+  // 生徒ごとの現契約年の消化数
+  const consumedMap = useMemo(() => {
+    const m = new Map<string, number>();
+    students.forEach((s) => {
+      if (!s.startDate) {
+        m.set(s.docId, 0);
+        return;
+      }
+      const range = getContractYearRange(s.startDate);
+      const own = lessons.filter((l) => l.studentId === s.docId);
+      m.set(s.docId, countConsumed(own, range));
+    });
+    return m;
+  }, [students, lessons]);
 
   const displayStudents = useMemo(() => {
     const query = searchQuery.trim();
@@ -92,9 +106,7 @@ export default function Student() {
           break;
         case "count":
           cmp =
-            a.attendedDate.length +
-            a.absentDate.length -
-            (b.attendedDate.length + b.absentDate.length);
+            (consumedMap.get(a.docId) ?? 0) - (consumedMap.get(b.docId) ?? 0);
           break;
         default: {
           const keyA =
@@ -110,7 +122,7 @@ export default function Student() {
     });
 
     return sorted;
-  }, [students, searchQuery, sortKey, sortOrder]);
+  }, [students, searchQuery, sortKey, sortOrder, consumedMap]);
 
   // 退会済みを除外したアクティブ生徒 (名簿印刷用)
   const activeStudents = useMemo(
@@ -124,42 +136,39 @@ export default function Student() {
     const unsubscribe = onSnapshot(
       collection(db, "users", user.uid, "students"),
       (querySnapshot) => {
-        try {
-          // データ整形
-          const fetchedStudents = querySnapshot.docs.map((doc) => {
-            const data = doc.data() as Student; // 型アサーション
-            return {
-              docId: doc.id,
-              absentDate: data.absentDate || [],
-              age: data.age || 0,
-              attendedDate: data.attendedDate || [],
-              building: data.building || "",
-              city: data.city || "",
-              firstName: data.firstName || "",
-              firstNameKana: data.firstNameKana || "",
-              gender: data.gender || 0,
-              hour: data.hour || "",
-              isWithdrawn: data.isWithdrawn ?? false,
-              lastName: data.lastName || "",
-              lastNameKana: data.lastNameKana || "",
-              maxCount: data.maxCount || "",
-              minute: data.minute || "",
-              pref: data.pref || "",
-              schedule: data.schedule || [],
-              startDate: data.startDate || "",
-              street: data.street || "",
-            };
-          });
-
-          // 状態を更新
-          setStudents(fetchedStudents);
-        } catch (error) {
-          console.error("Error processing snapshot data:", error);
-        }
+        const fetchedStudents = querySnapshot.docs.map((d) => {
+          const data = d.data();
+          return {
+            docId: d.id,
+            age: Number(data.age ?? 0),
+            building: data.building ?? "",
+            city: data.city ?? "",
+            firstName: data.firstName ?? "",
+            firstNameKana: data.firstNameKana ?? "",
+            isWithdrawn: data.isWithdrawn ?? false,
+            lastName: data.lastName ?? "",
+            lastNameKana: data.lastNameKana ?? "",
+            maxCount: Number(data.maxCount ?? 0),
+            pref: data.pref ?? "",
+            startDate: data.startDate ? dayjs(data.startDate.toDate()) : null,
+            street: data.street ?? "",
+          };
+        });
+        setStudents(fetchedStudents);
       }
     );
 
-    // クリーンアップ関数
+    return () => unsubscribe();
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    const unsubscribe = onSnapshot(
+      collection(db, "users", user.uid, "lessons"),
+      (snap) => {
+        setLessons(snap.docs.map((d) => toLesson(d.id, d.data())));
+      }
+    );
     return () => unsubscribe();
   }, [user]);
 
@@ -240,7 +249,7 @@ export default function Student() {
                       fontWeight: 600,
                     }}
                   >
-                    登録レッスン回数
+                    消化レッスン回数
                   </TableSortLabel>
                 </CustomTableCell>
               </TableRow>
@@ -276,10 +285,9 @@ export default function Student() {
                   </CustomTableCell>
                   <CustomTableCell>{student.age}</CustomTableCell>
                   <CustomTableCell>
-                    {student.attendedDate.length +
-                      student.absentDate.length +
-                      " / " +
-                      student.maxCount}
+                    {`${consumedMap.get(student.docId) ?? 0} / ${
+                      student.maxCount
+                    }`}
                   </CustomTableCell>
                 </TableRow>
               ))}
