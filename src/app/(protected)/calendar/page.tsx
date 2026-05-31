@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Box, FormControlLabel, Switch, Typography } from "@mui/material";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/firebase";
@@ -48,8 +48,65 @@ const PRINT_CSS = `
     page-break-after: avoid;
     page-break-inside: avoid;
   }
+  /* プレビュー用の縮小ラッパーは印刷時に等倍へ戻す（縮小・クリップを防ぐ） */
+  .calendar-preview-frame,
+  .calendar-preview-scale {
+    transform: none !important;
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    border: none !important;
+  }
 }
 `;
+
+// A4 横長(297mm)を 96dpi で px 換算した基準キャンバス幅
+const PREVIEW_DESIGN_WIDTH = 1123;
+const A4_LANDSCAPE_RATIO = 210 / 297;
+
+// 印刷時と同じ比率・レイアウトのまま、コンテナ幅に合わせて等倍縮小して表示する
+function ScaledPreview({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new ResizeObserver((entries) => {
+      setWidth(entries[0].contentRect.width);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const scale = width > 0 ? width / PREVIEW_DESIGN_WIDTH : 0;
+  const designHeight = PREVIEW_DESIGN_WIDTH * A4_LANDSCAPE_RATIO;
+
+  return (
+    <Box
+      ref={ref}
+      className="calendar-preview-frame"
+      sx={{
+        width: "100%",
+        height: width > 0 ? designHeight * scale : "auto",
+        overflow: "hidden",
+      }}
+    >
+      <Box
+        className="calendar-preview-scale"
+        sx={{
+          width: PREVIEW_DESIGN_WIDTH,
+          height: designHeight,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+          visibility: width > 0 ? "visible" : "hidden",
+        }}
+      >
+        {children}
+      </Box>
+    </Box>
+  );
+}
 
 export default function CalendarPage() {
   const { user } = useAuth();
@@ -95,7 +152,9 @@ export default function CalendarPage() {
 
   const handlePrint = () => {
     const originalTitle = document.title;
-    document.title = `${academicYear}年度${getTermLabel(term)}_レッスンカレンダー`;
+    document.title = `${academicYear}年度${getTermLabel(
+      term
+    )}_レッスンカレンダー`;
     window.print();
     document.title = originalTitle;
   };
@@ -153,7 +212,9 @@ export default function CalendarPage() {
               />
             }
             label="ロゴを掲載"
-            sx={{ fontFamily: theme.typography.fontFamily }}
+            sx={{
+              fontFamily: theme.typography.fontFamily,
+            }}
           />
         </Box>
         {(!classroomName || !logoDataUrl) && (
@@ -175,21 +236,24 @@ export default function CalendarPage() {
         <Box
           sx={{
             width: { xs: "100%", sm: "60%" },
-            margin: "0 auto",
             border: `1px solid ${theme.palette.secondary.main}`,
             borderRadius: 2,
             overflow: "hidden",
             backgroundColor: "#ffffff",
           }}
         >
-          <LessonCalendarHtml
-            academicYear={academicYear}
-            term={term}
-            classroomName={
-              includeClassroomName && classroomName ? classroomName : undefined
-            }
-            logoDataUrl={includeLogo && logoDataUrl ? logoDataUrl : undefined}
-          />
+          <ScaledPreview>
+            <LessonCalendarHtml
+              academicYear={academicYear}
+              term={term}
+              classroomName={
+                includeClassroomName && classroomName
+                  ? classroomName
+                  : undefined
+              }
+              logoDataUrl={includeLogo && logoDataUrl ? logoDataUrl : undefined}
+            />
+          </ScaledPreview>
         </Box>
         <Typography
           sx={{
@@ -200,9 +264,10 @@ export default function CalendarPage() {
             lineHeight: 1.6,
           }}
         >
-          ※ ダウンロードボタンを押すと印刷ダイアログが開きます。「PDFとして保存」を選んでください。
-          <br />
-          ※ 日付やURLがPDFに入る場合は、印刷ダイアログの「ヘッダーとフッター」をオフにしてください。
+          ※
+          ダウンロードボタンを押すと印刷ダイアログが開きます。「PDFとして保存」を選んでください。
+          <br />※
+          日付やURLがPDFに入る場合は、印刷ダイアログの「ヘッダーとフッター」をオフにしてください。
         </Typography>
       </Panel>
       <Box sx={{ display: "flex", justifyContent: "center" }}>
