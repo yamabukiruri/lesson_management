@@ -38,11 +38,11 @@ export function MainBtn({ label, sx, disabled, onClick }: BtnProps) {
 
 export function SubBtn({ label, sx, disabled, onClick }: BtnProps) {
   const defaultSx: SxProps<Theme> = {
-    backgroundColor: "transparent",
-    color: theme.palette.primary.main,
+    backgroundColor: "#fff",
+    color: theme.palette.secondary.dark,
     padding: "12px 16px",
     borderRadius: "20px",
-    border: `1px solid ${theme.palette.primary.main}`,
+    border: `1.5px solid ${theme.palette.secondary.dark}`,
     fontWeight: 600,
     fontFamily: theme.typography.fontFamily,
     fontSize: "1rem",
@@ -50,7 +50,7 @@ export function SubBtn({ label, sx, disabled, onClick }: BtnProps) {
     transition: "all 0.3s ease",
     "&:hover": {
       backgroundColor: theme.palette.secondary.light,
-      borderColor: theme.palette.primary.main,
+      borderColor: theme.palette.secondary.dark,
     },
   };
 

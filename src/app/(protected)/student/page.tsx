@@ -208,6 +208,8 @@ export default function Student() {
         <Box sx={{ mb: 2 }}>
           <CustomTextField
             label="名前で検索"
+            placeholder="名前で検索"
+            search
             name="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -268,7 +270,7 @@ export default function Student() {
                     <Link
                       href={"/student/" + student.docId}
                       sx={{
-                        color: theme.palette.primary.main,
+                        color: theme.palette.secondary.dark,
                         fontWeight: "bold",
                       }}
                     >

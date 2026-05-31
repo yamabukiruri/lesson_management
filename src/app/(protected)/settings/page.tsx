@@ -173,7 +173,7 @@ export default function Settings() {
                   width: 128,
                   height: 128,
                   objectFit: "contain",
-                  backgroundColor: theme.palette.secondary.light,
+                  backgroundColor: "#fff",
                   borderRadius: 2,
                   padding: 1,
                   border: `1px solid ${theme.palette.secondary.main}`,
@@ -200,10 +200,7 @@ export default function Settings() {
               onClick={() => fileInputRef.current?.click()}
             />
             {logoDataUrl && (
-              <SubBtn
-                label="ロゴを削除"
-                onClick={() => setLogoDataUrl("")}
-              />
+              <SubBtn label="ロゴを削除" onClick={() => setLogoDataUrl("")} />
             )}
           </Box>
           {logoError && (

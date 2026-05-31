@@ -44,10 +44,18 @@ import {
 
 function LegendItem({ color, label }: { color: string; label: string }) {
   return (
-    <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+    <Box
+      component="span"
+      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+    >
       <Box
         component="span"
-        sx={{ width: 14, height: 14, borderRadius: "50%", backgroundColor: color }}
+        sx={{
+          width: 14,
+          height: 14,
+          borderRadius: "50%",
+          backgroundColor: color,
+        }}
       />
       {label}
     </Box>
@@ -180,7 +188,11 @@ export default function StudentId() {
     }
 
     const ageNum = Number(student.age);
-    if (student.age === "" || student.age === null || student.age === undefined) {
+    if (
+      student.age === "" ||
+      student.age === null ||
+      student.age === undefined
+    ) {
       e.age = "年齢を入力してください";
     } else if (!Number.isInteger(ageNum) || ageNum < 0 || ageNum > 120) {
       e.age = "0〜120の整数で入力してください";
@@ -198,7 +210,11 @@ export default function StudentId() {
     }
 
     const hourNum = Number(student.hour);
-    if (student.hour === "" || student.hour === null || student.hour === undefined) {
+    if (
+      student.hour === "" ||
+      student.hour === null ||
+      student.hour === undefined
+    ) {
       e.hour = "時を入力してください";
     } else if (!Number.isInteger(hourNum) || hourNum < 0 || hourNum > 23) {
       e.hour = "0〜23で入力してください";
@@ -211,7 +227,11 @@ export default function StudentId() {
       student.minute === undefined
     ) {
       e.minute = "分を入力してください";
-    } else if (!Number.isInteger(minuteNum) || minuteNum < 0 || minuteNum > 59) {
+    } else if (
+      !Number.isInteger(minuteNum) ||
+      minuteNum < 0 ||
+      minuteNum > 59
+    ) {
       e.minute = "0〜59で入力してください";
     }
 
@@ -278,16 +298,16 @@ export default function StudentId() {
           fontFamily: theme.typography.fontFamily,
           fontWeight: "700 !important",
           backgroundColor: isAttended
-            ? `${theme.palette.secondary.main} !important`
+            ? `${theme.palette.primary.light} !important`
             : isScheduled
             ? draftEntry?.countable
               ? `${theme.palette.primary.main} !important`
-              : `${theme.palette.tertiary.main} !important`
+              : `${theme.palette.secondary.main} !important`
             : "transparent !important",
           color: "black !important",
           borderRadius: "50%",
           border: isSingle
-            ? `2px dashed ${theme.palette.tertiary.dark} !important`
+            ? `2px dashed ${theme.palette.secondary.dark} !important`
             : isAbsent
             ? `1px dotted ${theme.palette.primary.main} !important`
             : undefined,
@@ -359,7 +379,11 @@ export default function StudentId() {
 
     const lessonsRef = collection(db, "users", user.uid, "lessons");
     toCreate.forEach((d) => {
-      const dt = d.date.startOf("day").hour(hourNum).minute(minuteNum).second(0);
+      const dt = d.date
+        .startOf("day")
+        .hour(hourNum)
+        .minute(minuteNum)
+        .second(0);
       batch.set(doc(lessonsRef), {
         studentId,
         date: Timestamp.fromDate(dt.toDate()),
@@ -588,26 +612,26 @@ export default function StudentId() {
           </Box>
         </Box>
         {id !== "0" && contractRange && (
-          <Typography
-            sx={{
-              fontFamily: theme.typography.fontFamily,
-              marginBottom: 2,
-              color:
-                consumed >= Number(student.maxCount)
-                  ? theme.palette.primary.dark
-                  : "inherit",
-              fontWeight: consumed >= Number(student.maxCount) ? 700 : 400,
-            }}
-          >
-            今年度の消化レッスン: {consumed} / {student.maxCount} 回
+          <Box>
+            <SectionTitle label={"今年度の消化レッスン"} />
             <Box
-              component="span"
-              sx={{ fontSize: "0.8rem", color: "#888", marginLeft: 1 }}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                padding: 2,
+                backgroundColor: theme.palette.primary.light,
+                fontSize: 40,
+              }}
             >
-              （{contractRange.start.format("YYYY/MM/DD")}〜
-              {contractRange.end.subtract(1, "day").format("YYYY/MM/DD")}）
+              <Box sx={{ fontWeight: "bold" }}>
+                {consumed} / {student.maxCount} 回
+              </Box>
+              <Box component="span" sx={{ fontSize: 20, marginLeft: 1 }}>
+                （{contractRange.start.format("YYYY/MM/DD")}〜
+                {contractRange.end.subtract(1, "day").format("YYYY/MM/DD")}）
+              </Box>
             </Box>
-          </Typography>
+          </Box>
         )}
         <Divider />
         <SectionTitle label="今回分スケジュール" sx={{ marginTop: 2 }} />
@@ -631,12 +655,12 @@ export default function StudentId() {
           }}
         >
           <LegendItem color={theme.palette.primary.main} label="予定" />
-          <LegendItem
-            color={theme.palette.tertiary.main}
-            label="単発予定"
-          />
-          <LegendItem color={theme.palette.secondary.main} label="出席" />
-          <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <LegendItem color={theme.palette.secondary.main} label="単発予定" />
+          <LegendItem color={theme.palette.primary.light} label="出席" />
+          <Box
+            component="span"
+            sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+          >
             <Box
               component="span"
               sx={{

@@ -28,7 +28,7 @@ interface SectionTitleProps {
 
 export function SectionTitle({ label, sx }: SectionTitleProps) {
   const defaultSx = {
-    marginBottom: 1,
+    marginBottom: 2,
     fontFamily: theme.typography.fontFamily,
   };
   return (

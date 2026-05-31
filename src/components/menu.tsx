@@ -7,7 +7,7 @@ import MuiDrawer from "@mui/material/Drawer";
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
-import CssBaseline from "@mui/material/CssBaseline";
+// CssBaseline は app/providers.tsx でグローバルに適用
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
@@ -202,12 +202,12 @@ export default function MenuBar() {
 
   return (
     <Box sx={{ display: "flex" }}>
-      <CssBaseline />
       <AppBar
         position="fixed"
         open={!isMobile && open}
         sx={{
           backgroundColor: theme.palette.primary.main,
+          color: "#fff",
         }}
       >
         <Toolbar sx={{ justifyContent: "space-between" }}>

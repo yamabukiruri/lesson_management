@@ -6,12 +6,40 @@ import {
   Checkbox,
   FormControl,
   FormControlLabel,
+  InputAdornment,
   InputLabel,
   MenuItem,
   Select,
   SelectChangeEvent,
 } from "@mui/material";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { ChangeEvent } from "react";
+
+// 共通スタイル：白地・ソフトなベージュ枠・金色フォーカス
+const outlinedFieldSx = (rounded: boolean) => ({
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: rounded ? "999px" : "12px",
+    transition: "border-color 0.2s ease",
+    "& fieldset": {
+      borderColor: theme.palette.secondary.main,
+    },
+    "&:hover fieldset": {
+      borderColor: theme.palette.secondary.dark,
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: theme.palette.secondary.dark,
+      borderWidth: "1.5px",
+    },
+  },
+  "& .MuiInputLabel-root": {
+    color: theme.palette.text.secondary,
+    fontWeight: 600,
+  },
+  "& .MuiInputLabel-root.Mui-focused": {
+    color: theme.palette.secondary.dark,
+  },
+});
 
 interface CustomTextFieldProps {
   label: string;
@@ -22,6 +50,8 @@ interface CustomTextFieldProps {
   error?: boolean;
   helperText?: string;
   required?: boolean;
+  search?: boolean;
+  placeholder?: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -34,40 +64,14 @@ export function CustomTextField({
   error,
   helperText,
   required,
+  search,
+  placeholder,
   onChange,
 }: CustomTextFieldProps) {
-  const defaultSx = {
-    "& .MuiFilledInput-root": {
-      backgroundColor: theme.palette.secondary.light,
-      borderRadius: "8px",
-      height: "56px", // 統一高さ
-      transition: "all 0.3s ease",
-      "&:hover": {
-        backgroundColor: theme.palette.primary.light,
-      },
-      "&.Mui-focused": {
-        backgroundColor: theme.palette.secondary.main,
-      },
-      "&:after": {
-        borderBottom: `2px solid ${theme.palette.primary.main}`,
-      },
-    },
-    "& .MuiInputLabel-root": {
-      color: "#888",
-      fontWeight: 600,
-    },
-    "& .MuiInputLabel-root.Mui-focused": {
-      color: theme.palette.primary.main,
-    },
-  };
-
   const renderedLabel = required ? (
     <>
       {label}
-      <Box
-        component="span"
-        sx={{ color: theme.palette.error.main, ml: 0.5 }}
-      >
+      <Box component="span" sx={{ color: theme.palette.error.main, ml: 0.5 }}>
         （必須）
       </Box>
     </>
@@ -77,14 +81,30 @@ export function CustomTextField({
 
   return (
     <TextField
-      label={renderedLabel}
-      variant="filled"
+      label={search ? undefined : renderedLabel}
+      placeholder={placeholder}
+      variant="outlined"
       name={name}
       value={value}
       type={type}
       error={error}
       helperText={helperText}
-      sx={{ ...defaultSx, ...sx }}
+      slotProps={
+        search
+          ? {
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchRoundedIcon
+                      sx={{ color: theme.palette.secondary.dark }}
+                    />
+                  </InputAdornment>
+                ),
+              },
+            }
+          : undefined
+      }
+      sx={{ ...outlinedFieldSx(!!search), ...sx }}
       onChange={onChange}
       fullWidth
     />
@@ -110,31 +130,6 @@ export function CustomPulldown({
   disabled,
   onChange,
 }: CustomPulldownProps) {
-  const defaultSx = {
-    "& .MuiFilledInput-root": {
-      backgroundColor: theme.palette.secondary.light,
-      borderRadius: "8px",
-      height: "56px", // TextField と統一
-      transition: "all 0.3s ease",
-      "&:hover": {
-        backgroundColor: theme.palette.primary.light,
-      },
-      "&.Mui-focused": {
-        backgroundColor: theme.palette.secondary.main,
-      },
-      "&:after": {
-        borderBottom: `2px solid ${theme.palette.primary.main}`,
-      },
-    },
-    "& .MuiInputLabel-root": {
-      color: "#888",
-      fontWeight: 600,
-    },
-    "& .MuiInputLabel-root.Mui-focused": {
-      color: theme.palette.primary.main,
-    },
-  };
-
   const handleSelectChange = (event: SelectChangeEvent<number>) => {
     onChange(event.target.value as number);
   };
@@ -142,15 +137,20 @@ export function CustomPulldown({
   return (
     <Box sx={{ minWidth: 120 }}>
       <FormControl
-        variant="filled"
+        variant="outlined"
         fullWidth
         disabled={disabled}
-        sx={{ ...defaultSx, ...sx }}
+        sx={{ ...outlinedFieldSx(false), ...sx }}
       >
         <InputLabel sx={{ fontFamily: theme.typography.fontFamily }}>
           {label}
         </InputLabel>
-        <Select value={value} name={name} onChange={handleSelectChange}>
+        <Select
+          value={value}
+          name={name}
+          label={label}
+          onChange={handleSelectChange}
+        >
           {options.map((option) => (
             <MenuItem
               key={option.id}
@@ -159,11 +159,11 @@ export function CustomPulldown({
                 "&:hover": {
                   backgroundColor: theme.palette.primary.light,
                 },
-                "&.Mui-selected": {
+                "&&.Mui-selected": {
                   backgroundColor: theme.palette.primary.main,
                   color: "#fff",
                 },
-                "&.Mui-selected:hover": {
+                "&&.Mui-selected:hover": {
                   backgroundColor: theme.palette.primary.dark,
                 },
               }}

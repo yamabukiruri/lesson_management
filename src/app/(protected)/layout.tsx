@@ -30,7 +30,13 @@ export default function ProtectedLayout({
   }
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        backgroundColor: "background.default",
+      }}
+    >
       <MenuBar />
       <main>{children}</main>
     </Box>

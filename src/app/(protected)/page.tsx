@@ -209,7 +209,7 @@ export default function Home() {
         <TableRow
           sx={{
             backgroundColor: isOverCap
-              ? theme.palette.tertiary.light
+              ? theme.palette.secondary.light
               : undefined,
           }}
         >
@@ -217,7 +217,7 @@ export default function Home() {
           <CustomTableCell>
             <Link
               href={`/student/${student.id}`}
-              sx={{ color: theme.palette.primary.main, fontWeight: "bold" }}
+              sx={{ color: theme.palette.secondary.dark, fontWeight: "bold" }}
             >
               {`${student.lastName} ${student.firstName}`}
             </Link>

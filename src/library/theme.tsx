@@ -2,31 +2,26 @@ import { createTheme } from "@mui/material/styles";
 import "@fontsource/comic-neue";
 import "@fontsource/zen-maru-gothic";
 
-declare module "@mui/material/styles" {
-  interface Palette {
-    tertiary: Palette["primary"];
-  }
-  interface PaletteOptions {
-    tertiary?: PaletteOptions["primary"];
-  }
-}
-
 export const theme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#b37a7d", // くすみローズ
-      light: "#decac4", // サンドベージュ
-      dark: "#94595c",
+      main: "#262522", // 黒に近いチャコール（黒鍵のイメージ）
+      light: "#ddd8d0", // 温かいライトグレー（ホバー／淡い背景）
+      dark: "#111111", // ほぼ黒
     },
     secondary: {
-      main: "#eae3dd", // ライトグレージュ
-      light: "#f7f4f1", // ミストホワイト
+      main: "#c9a14a", // ブラスゴールド（差し色）
+      light: "#efe2bf", // 淡いゴールドベージュ
+      dark: "#a07c2e", // 深いゴールド
     },
-    tertiary: {
-      main: "#f7e3a7", // ペールバター
-      light: "#fff7db", // アイボリー寄りの明るさ
-      dark: "#e5c97f", // 少し深みのある黄
+    background: {
+      default: "#f4eede", // 温かいクリーム地
+      paper: "#ffffff", // カードは白〜アイボリー
+    },
+    text: {
+      primary: "#2b241b", // ダークウォームブラウン
+      secondary: "#6b5d49", // ソフトブラウン
     },
   },
   typography: {
