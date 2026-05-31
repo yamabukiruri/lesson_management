@@ -9,7 +9,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TableSortLabel,
   Typography,
 } from "@mui/material";
 import { db } from "@/firebase";
@@ -21,7 +20,7 @@ import { useRouter } from "next/navigation";
 import dayjs, { Dayjs } from "dayjs";
 import { theme } from "@/library/theme";
 import { useAuth } from "@/app/context/auth-context";
-import CustomTableCell from "@/components/table-cell";
+import CustomTableCell, { SortableTableCell } from "@/components/table-cell";
 import { CustomTextField } from "@/components/input";
 import {
   countConsumed,
@@ -219,45 +218,27 @@ export default function Student() {
           <Table>
             <TableHead>
               <TableRow>
-                <CustomTableCell>
-                  <TableSortLabel
-                    active={sortKey === "name"}
-                    direction={sortKey === "name" ? sortOrder : "desc"}
-                    onClick={() => handleSort("name")}
-                    sx={{
-                      fontFamily: theme.typography.fontFamily,
-                      fontWeight: 600,
-                    }}
-                  >
-                    名前
-                  </TableSortLabel>
-                </CustomTableCell>
-                <CustomTableCell>
-                  <TableSortLabel
-                    active={sortKey === "age"}
-                    direction={sortKey === "age" ? sortOrder : "desc"}
-                    onClick={() => handleSort("age")}
-                    sx={{
-                      fontFamily: theme.typography.fontFamily,
-                      fontWeight: 600,
-                    }}
-                  >
-                    年齢
-                  </TableSortLabel>
-                </CustomTableCell>
-                <CustomTableCell>
-                  <TableSortLabel
-                    active={sortKey === "count"}
-                    direction={sortKey === "count" ? sortOrder : "desc"}
-                    onClick={() => handleSort("count")}
-                    sx={{
-                      fontFamily: theme.typography.fontFamily,
-                      fontWeight: 600,
-                    }}
-                  >
-                    消化レッスン回数
-                  </TableSortLabel>
-                </CustomTableCell>
+                <SortableTableCell
+                  columnKey="name"
+                  label="名前"
+                  activeKey={sortKey}
+                  order={sortOrder}
+                  onSort={handleSort}
+                />
+                <SortableTableCell
+                  columnKey="age"
+                  label="年齢"
+                  activeKey={sortKey}
+                  order={sortOrder}
+                  onSort={handleSort}
+                />
+                <SortableTableCell
+                  columnKey="count"
+                  label="消化レッスン回数"
+                  activeKey={sortKey}
+                  order={sortOrder}
+                  onSort={handleSort}
+                />
               </TableRow>
             </TableHead>
             <TableBody>

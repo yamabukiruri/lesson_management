@@ -1,6 +1,6 @@
-import { TableCell } from "@mui/material";
+import { TableCell, TableSortLabel } from "@mui/material";
 import { SxProps, Theme } from "@mui/system";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, ReactNode } from "react";
 import { theme } from "@/library/theme";
 
 interface CustomTableCellProps {
@@ -19,4 +19,40 @@ export default function CustomTableCell({
   };
 
   return <TableCell sx={{ ...defaultSx, ...sx }}>{children}</TableCell>;
+}
+
+interface SortableTableCellProps<K extends string> {
+  columnKey: K;
+  label: ReactNode;
+  activeKey: K;
+  order: "asc" | "desc";
+  onSort: (key: K) => void;
+  sx?: SxProps<Theme>;
+}
+
+export function SortableTableCell<K extends string>({
+  columnKey,
+  label,
+  activeKey,
+  order,
+  onSort,
+  sx,
+}: SortableTableCellProps<K>) {
+  const active = activeKey === columnKey;
+
+  return (
+    <CustomTableCell sx={sx}>
+      <TableSortLabel
+        active={active}
+        direction={active ? order : "desc"}
+        onClick={() => onSort(columnKey)}
+        sx={{
+          fontFamily: theme.typography.fontFamily,
+          fontWeight: 600,
+        }}
+      >
+        {label}
+      </TableSortLabel>
+    </CustomTableCell>
+  );
 }
