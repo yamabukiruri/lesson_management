@@ -22,6 +22,7 @@ import { theme } from "@/library/theme";
 import { useAuth } from "@/app/context/auth-context";
 import CustomTableCell, { SortableTableCell } from "@/components/table-cell";
 import { CustomTextField } from "@/components/input";
+import { weekdayList } from "@/library/fixed-data";
 import {
   countConsumed,
   getContractYearRange,
@@ -34,7 +35,7 @@ import {
   formatRosterDate,
 } from "./roster-print";
 
-type SortKey = "name" | "age" | "count";
+type SortKey = "name" | "age" | "time" | "count";
 type SortOrder = "asc" | "desc";
 
 interface Doc {
@@ -51,7 +52,15 @@ interface Doc {
   pref: string;
   countStartDate: Dayjs | null;
   street: string;
+  dayOfWeek: number;
+  hour: number;
+  minute: number;
 }
+
+const formatLessonTime = (dayOfWeek: number, hour: number, minute: number) => {
+  const weekday = weekdayList.find((w) => w.id === dayOfWeek)?.name ?? "";
+  return `${weekday} ${hour}:${String(minute).padStart(2, "0")}〜`;
+};
 
 export default function Student() {
   const { user } = useAuth();
@@ -102,6 +111,12 @@ export default function Student() {
       switch (sortKey) {
         case "age":
           cmp = Number(a.age) - Number(b.age);
+          break;
+        case "time":
+          cmp =
+            a.dayOfWeek - b.dayOfWeek ||
+            a.hour - b.hour ||
+            a.minute - b.minute;
           break;
         case "count":
           cmp =
@@ -155,6 +170,9 @@ export default function Student() {
               ? dayjs(data.startDate.toDate())
               : null,
             street: data.street ?? "",
+            dayOfWeek: Number(data.dayOfWeek ?? 0),
+            hour: Number(data.hour ?? 0),
+            minute: Number(data.minute ?? 0),
           };
         });
         setStudents(fetchedStudents);
@@ -233,6 +251,13 @@ export default function Student() {
                   onSort={handleSort}
                 />
                 <SortableTableCell
+                  columnKey="time"
+                  label="レッスン時間"
+                  activeKey={sortKey}
+                  order={sortOrder}
+                  onSort={handleSort}
+                />
+                <SortableTableCell
                   columnKey="count"
                   label="消化レッスン回数"
                   activeKey={sortKey}
@@ -271,6 +296,13 @@ export default function Student() {
                     )}
                   </CustomTableCell>
                   <CustomTableCell>{student.age}</CustomTableCell>
+                  <CustomTableCell>
+                    {formatLessonTime(
+                      student.dayOfWeek,
+                      student.hour,
+                      student.minute
+                    )}
+                  </CustomTableCell>
                   <CustomTableCell>
                     {`${consumedMap.get(student.docId) ?? 0} / ${
                       student.maxCount

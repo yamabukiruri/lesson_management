@@ -1,3 +1,13 @@
+export const weekdayList = [
+  { id: 0, name: '日曜' },
+  { id: 1, name: '月曜' },
+  { id: 2, name: '火曜' },
+  { id: 3, name: '水曜' },
+  { id: 4, name: '木曜' },
+  { id: 5, name: '金曜' },
+  { id: 6, name: '土曜' },
+];
+
 export const prefList = [
   { id: 0, name: '未選択' },
   { id: 1, name: '北海道' },

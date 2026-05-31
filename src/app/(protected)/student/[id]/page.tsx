@@ -32,7 +32,7 @@ import {
   CustomTextField,
 } from "@/components/input";
 import { Notice } from "@/components/notice";
-import { prefList } from "@/library/fixed-data";
+import { prefList, weekdayList } from "@/library/fixed-data";
 import { useAuth } from "@/app/context/auth-context";
 import {
   COUNTED_STATUSES,
@@ -78,6 +78,7 @@ export default function StudentId() {
     startDate: defaultDate,
     countStartDate: defaultDate,
     maxCount: 0,
+    dayOfWeek: 0,
     hour: 0,
     minute: 0,
     gender: 0,
@@ -124,6 +125,7 @@ export default function StudentId() {
           ? data.startDate.toDate().toISOString().split("T")[0]
           : defaultDate,
         maxCount: data.maxCount ?? 0,
+        dayOfWeek: data.dayOfWeek ?? 0,
         hour: data.hour ?? 0,
         minute: data.minute ?? 0,
         gender: data.gender ?? 0,
@@ -337,6 +339,7 @@ export default function StudentId() {
       city: student.city,
       street: student.street,
       building: student.building,
+      dayOfWeek: student.dayOfWeek,
       hour: student.hour,
       minute: student.minute,
       maxCount: student.maxCount,
@@ -579,6 +582,19 @@ export default function StudentId() {
             error={!!errors.maxCount}
             helperText={errors.maxCount}
             onChange={handleTextField}
+          />
+          <Box />
+          <CustomPulldown
+            label="レッスン曜日"
+            name="dayOfWeek"
+            value={student.dayOfWeek}
+            options={weekdayList}
+            onChange={(newValue: number) => {
+              setStudent((prevState) => ({
+                ...prevState,
+                dayOfWeek: newValue,
+              }));
+            }}
           />
           <Box
             sx={{
