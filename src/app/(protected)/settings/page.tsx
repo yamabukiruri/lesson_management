@@ -174,9 +174,8 @@ export default function Settings() {
                   height: 128,
                   objectFit: "contain",
                   backgroundColor: "#fff",
-                  borderRadius: 2,
                   padding: 1,
-                  border: `1px solid ${theme.palette.secondary.main}`,
+                  border: `1.5px solid ${theme.palette.primary.main}`,
                 }}
               />
             </Box>

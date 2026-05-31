@@ -15,6 +15,7 @@ export default function CustomTableCell({
     textAlign: "center",
     fontFamily: theme.typography.fontFamily,
     fontSize: "16px",
+    fontWeight: 600,
   };
 
   return <TableCell sx={{ ...defaultSx, ...sx }}>{children}</TableCell>;

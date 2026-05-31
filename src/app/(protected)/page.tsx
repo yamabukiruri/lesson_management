@@ -167,9 +167,7 @@ export default function Home() {
               alignItems="center"
               justifyContent="center"
             >
-              <Typography
-                sx={{ fontWeight: 700, color: theme.palette.primary.dark }}
-              >
+              <Typography sx={{ color: theme.palette.primary.dark }}>
                 {label}
               </Typography>
               <SubBtn

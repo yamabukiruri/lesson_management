@@ -236,8 +236,7 @@ export default function CalendarPage() {
         <Box
           sx={{
             width: { xs: "100%", sm: "60%" },
-            border: `1px solid ${theme.palette.secondary.main}`,
-            borderRadius: 2,
+            border: `1.5px solid ${theme.palette.primary.main}`,
             overflow: "hidden",
             backgroundColor: "#ffffff",
           }}
